@@ -35,6 +35,12 @@ use Friendica\Util\Strings;
  */
 final class AppLegacy implements AppHelper
 {
+	private $platform;
+
+	private $codename;
+
+	private $version;
+
 	private $profile_owner = 0;
 
 	private $timezone = '';
@@ -107,6 +113,24 @@ final class AppLegacy implements AppHelper
 		$this->baseURL  = $baseURL;
 		$this->pConfig  = $pConfig;
 		$this->session  = $session;
+		$this->platform = App::PLATFORM;
+		$this->codename = App::CODENAME;
+		$this->version  = App::VERSION;
+	}
+
+	public function getPlatform(): string
+	{
+		return $this->platform;
+	}
+
+	public function getCodename(): string
+	{
+		return $this->codename;
+	}
+
+	public function getVersion(): string
+	{
+		return $this->version;
 	}
 
 	/**

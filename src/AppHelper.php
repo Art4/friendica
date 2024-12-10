@@ -22,6 +22,12 @@ use Friendica\Core\Config\ValueObject\Cache;
  */
 interface AppHelper
 {
+	public function getPlatform(): string;
+
+	public function getCodename(): string;
+
+	public function getVersion(): string;
+
 	/**
 	 * Set the profile owner ID
 	 */

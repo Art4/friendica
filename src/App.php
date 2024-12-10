@@ -91,7 +91,7 @@ class App implements AppHelper
 	private $l10n;
 
 	/**
-	 * @var App\Arguments
+	 * @var Arguments
 	 */
 	private $args;
 
@@ -132,6 +132,30 @@ class App implements AppHelper
 		$this->appHelper = DI::appHelper();
 
 		$this->load($dbaDefinition, $viewDefinition);
+	}
+
+	/**
+	 * @deprecated 2024.12 Use AppHelper::getPlatform() instead
+	 */
+	public function getPlatform(): string
+	{
+		return App::PLATFORM;
+	}
+
+	/**
+	 * @deprecated 2024.12 Use AppHelper::getCodename() instead
+	 */
+	public function getCodename(): string
+	{
+		return App::CODENAME;
+	}
+
+	/**
+	 * @deprecated 2024.12 Use AppHelper::getVersion() instead
+	 */
+	public function getVersion(): string
+	{
+		return App::VERSION;
 	}
 
 	/**

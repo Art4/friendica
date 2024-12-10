@@ -97,6 +97,11 @@ return [
 	],
 	AppHelper::class => [
 		'instanceOf' => AppLegacy::class,
+		'constructParams' => [
+			App::PLATFORM,
+			App::CODENAME,
+			App::VERSION,
+		],
 	],
 	ICanCreateInstances::class   => [
 		'instanceOf' => DiceInstanceManager::class,

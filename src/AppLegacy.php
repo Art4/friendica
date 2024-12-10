@@ -104,7 +104,10 @@ final class AppLegacy implements AppHelper
 		BaseURL $baseURL,
 		L10n $l10n,
 		IManagePersonalConfigValues $pConfig,
-		IHandleUserSessions $session
+		IHandleUserSessions $session,
+		string $platform,
+		string $codename,
+		string $version
 	) {
 		$this->database = $database;
 		$this->config   = $config;
@@ -113,9 +116,9 @@ final class AppLegacy implements AppHelper
 		$this->baseURL  = $baseURL;
 		$this->pConfig  = $pConfig;
 		$this->session  = $session;
-		$this->platform = App::PLATFORM;
-		$this->codename = App::CODENAME;
-		$this->version  = App::VERSION;
+		$this->platform = $platform;
+		$this->codename = $codename;
+		$this->version  = $version;
 	}
 
 	public function getPlatform(): string

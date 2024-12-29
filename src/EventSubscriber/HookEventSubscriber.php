@@ -10,24 +10,24 @@ declare(strict_types = 1);
 namespace Friendica\EventSubscriber;
 
 use Friendica\Event\DataFilterEvent;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Bridge between the EventDispatcher and the Hook class.
  */
-final class HookEventSubscriber implements EventSubscriberInterface
+final class HookEventSubscriber implements StaticEventSubscriber
 {
 	/**
 	 * @return array<string, string>
 	 */
-	public static function getSubscribedEvents(): array
+	public static function getStaticSubscribedEvents(): array
 	{
 		return [
 			DataFilterEvent::class => 'onDataFilterEvent',
 		];
 	}
 
-	public function onDataFilterEvent(DataFilterEvent $event): void
+	public static function onDataFilterEvent(DataFilterEvent $event): void
 	{
+		// Call the Hook class to process the event
 	}
 }

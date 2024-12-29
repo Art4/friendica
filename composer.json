@@ -71,6 +71,7 @@
 		"pragmarx/recovery": "^0.2",
 		"psr/clock": "^1.0",
 		"psr/container": "^2.0",
+		"psr/event-dispatcher": "^1.0",
 		"psr/log": "^1.1",
 		"seld/cli-prompt": "^1.0",
 		"smarty/smarty": "^4",

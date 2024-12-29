@@ -9,6 +9,7 @@ declare(strict_types = 1);
 
 namespace Friendica\EventSubscriber;
 
+use Friendica\Core\Hook;
 use Friendica\Event\DataFilterEvent;
 
 /**
@@ -28,6 +29,10 @@ final class HookEventSubscriber implements StaticEventSubscriber
 
 	public static function onDataFilterEvent(DataFilterEvent $event): void
 	{
-		// Call the Hook class to process the event
+		$data = $event->getData();
+
+		Hook::callAll($event->getName(), $data);
+
+		$event->setData($data);
 	}
 }

@@ -20,7 +20,7 @@ class DataFilterEventTest extends TestCase
 
 		$event = new DataFilterEvent('test', $data);
 
-		$this->assertEquals('test', $event->getName());
+		$this->assertSame('test', $event->getName());
 	}
 
 	public function testGetDataReturnsData(): void
@@ -29,7 +29,7 @@ class DataFilterEventTest extends TestCase
 
 		$event = new DataFilterEvent('test', $data);
 
-		$this->assertEquals($data, $event->getData());
+		$this->assertSame($data, $event->getData());
 	}
 
 	public function testSetDataUpdatesData(): void
@@ -42,6 +42,6 @@ class DataFilterEventTest extends TestCase
 
 		$event->setData($expected);
 
-		$this->assertEquals($expected, $event->getData());
+		$this->assertSame($expected, $event->getData());
 	}
 }

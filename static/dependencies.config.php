@@ -162,6 +162,9 @@ return (function(string $basepath, array $getVars, array $serverVars, array $coo
 				['create', [], Dice::CHAIN_CALL],
 			],
 		],
+		\Psr\EventDispatcher\EventDispatcherInterface::class => [
+			'instanceOf' => \Symfony\Component\EventDispatcher\EventDispatcher::class,
+		],
 		\Friendica\Core\Logger\Type\SyslogLogger::class => [
 			'instanceOf' => \Friendica\Core\Logger\Factory\SyslogLogger::class,
 			'call' => [

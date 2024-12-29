@@ -23,6 +23,8 @@ use Friendica\Core\Session\Capability\IHandleUserSessions;
 use Friendica\Core\Worker\Repository\Process as ProcessRepository;
 use Friendica\Database\Definition\DbaDefinition;
 use Friendica\Database\Definition\ViewDefinition;
+use Friendica\DI;
+use Friendica\EventSubscriber\HookEventSubscriber;
 use Friendica\Module\Maintenance;
 use Friendica\Security\Authentication;
 use Friendica\Core\Config\Capability\IManageConfigValues;
@@ -42,6 +44,7 @@ use Friendica\Util\DateTimeFormat;
 use Friendica\Util\HTTPInputData;
 use Friendica\Util\HTTPSignature;
 use Friendica\Util\Profiler;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 
@@ -138,6 +141,8 @@ class App
 				['determineRunMode', [false, $request->getServerParams()], Dice::CHAIN_CALL],
 			],
 		]);
+
+		$this->registerEventDispatcher();
 
 		$this->setupLegacyServiceLocator();
 
@@ -277,6 +282,16 @@ class App
 		$this->container = $this->container->addRule(LoggerInterface::class, [
 			'constructParams' => [$logChannel],
 		]);
+	}
+
+	private function registerEventDispatcher(): void
+	{
+		/** @var \Symfony\Component\EventDispatcher\EventDispatcher */
+		$eventDispatcher = $this->container->create(\Symfony\Component\EventDispatcher\EventDispatcher::class);
+
+		foreach (HookEventSubscriber::getStaticSubscribedEvents() as $eventName => $methodName) {
+			$eventDispatcher->addListener($eventName, [HookEventSubscriber::class, $methodName]);
+		}
 	}
 
 	private function setupLegacyServiceLocator(): void

@@ -16,9 +16,13 @@ final class DataFilterEvent
 {
 	private string $name;
 
-	private array $data;
+	/** @var string|array */
+	private $data;
 
-	public function __construct(string $name, array $data)
+	/**
+	 * @param string|array $data
+	 */
+	public function __construct(string $name, $data)
 	{
 		$this->name = $name;
 		$this->data = $data;
@@ -29,13 +33,29 @@ final class DataFilterEvent
 		return $this->name;
 	}
 
-	public function getData(): array
+	/**
+	 * @return string|array
+	 */
+	public function getData()
 	{
 		return $this->data;
 	}
 
-	public function setData(array $data): void
+	/**
+	 * @param string|array $data
+	 *
+	 * @throws \InvalidArgumentException If $data is a string but the original data was an array and vice versa.
+	 */
+	public function setData($data): void
 	{
+		if (is_string($this->data) && is_array($data)) {
+			throw new \InvalidArgumentException('Argument #1 ($data) must be of type string, array given');
+		}
+
+		if (is_array($this->data) && is_string($data)) {
+			throw new \InvalidArgumentException('Argument #1 ($data) must be of type array, string given');
+		}
+
 		$this->data = $data;
 	}
 }

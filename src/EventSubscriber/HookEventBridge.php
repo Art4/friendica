@@ -28,6 +28,16 @@ final class HookEventBridge implements StaticEventSubscriber
 	private static $callHook = null;
 
 	/**
+	 * This maps the event names to the legacy Hook names.
+	 */
+	private static array $eventMapper = [
+		HtmlFilterEvent::HEAD => 'head',
+		HtmlFilterEvent::FOOTER => 'footer',
+		HtmlFilterEvent::PAGE_CONTENT_TOP => 'page_content_top',
+		HtmlFilterEvent::PAGE_END => 'page_end',
+	];
+
+	/**
 	 * @return array<string, string>
 	 */
 	public static function getStaticSubscribedEvents(): array
@@ -50,8 +60,12 @@ final class HookEventBridge implements StaticEventSubscriber
 
 	public static function onHtmlFilterEvent(HtmlFilterEvent $event): void
 	{
+		$name = $event->getName();
+
+		$name = static::$eventMapper[$name] ?? $name;
+
 		$event->setHtml(
-			static::callHook($event->getName(), $event->getHtml())
+			static::callHook($name, $event->getHtml())
 		);
 	}
 

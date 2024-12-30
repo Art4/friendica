@@ -69,14 +69,27 @@ class HookEventBridgeTest extends TestCase
 		HookEventBridge::onDataFilterEvent($event);
 	}
 
-	public function testOnHtmlFilterEventCallsHook(): void
+	public static function getHtmlFilterEventData(): array
 	{
-		$event = new HtmlFilterEvent('test', 'original');
+		return [
+			[HtmlFilterEvent::HEAD, 'head'],
+			[HtmlFilterEvent::FOOTER, 'footer'],
+			[HtmlFilterEvent::PAGE_CONTENT_TOP, 'page_content_top'],
+			[HtmlFilterEvent::PAGE_END, 'page_end'],
+		];
+	}
+
+	/**
+	 * @dataProvider getHtmlFilterEventData
+	 */
+	public function testOnHtmlFilterEventCallsHookWithCorrectValue($name, $expected): void
+	{
+		$event = new HtmlFilterEvent($name, 'original');
 
 		$reflectionProperty = new \ReflectionProperty(HookEventBridge::class, 'callHook');
 
-		$reflectionProperty->setValue(null, function (string $name, $data) {
-			$this->assertSame('test', $name);
+		$reflectionProperty->setValue(null, function (string $name, $data) use($expected) {
+			$this->assertSame($expected, $name);
 			$this->assertSame('original', $data);
 
 			return $data;

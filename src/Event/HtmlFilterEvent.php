@@ -26,9 +26,6 @@ final class HtmlFilterEvent
 
 	private string $html;
 
-	/**
-	 * @param string|array $html
-	 */
 	public function __construct(string $name, string $html)
 	{
 		$this->name = $name;

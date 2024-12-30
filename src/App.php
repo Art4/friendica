@@ -23,7 +23,7 @@ use Friendica\Core\Session\Capability\IHandleUserSessions;
 use Friendica\Core\Worker\Repository\Process as ProcessRepository;
 use Friendica\Database\Definition\DbaDefinition;
 use Friendica\Database\Definition\ViewDefinition;
-use Friendica\DI;
+use Friendica\Event\NamedEvent;
 use Friendica\EventSubscriber\HookEventBridge;
 use Friendica\Module\Maintenance;
 use Friendica\Security\Authentication;
@@ -171,6 +171,7 @@ class App
 		$this->mode->setExecutor(Mode::INDEX);
 
 		$this->runFrontend(
+			$this->container->create(EventDispatcherInterface::class),
 			$this->container->create(IManagePersonalConfigValues::class),
 			$this->container->create(Page::class),
 			$this->container->create(Nav::class),
@@ -381,6 +382,7 @@ class App
 	 * @throws \ImagickException
 	 */
 	private function runFrontend(
+		EventDispatcherInterface $eventDispatcher,
 		IManagePersonalConfigValues $pconfig,
 		Page $page,
 		Nav $nav,
@@ -418,7 +420,8 @@ class App
 					$serverVars['REQUEST_METHOD'] === 'GET') {
 					System::externalRedirect($this->baseURL . '/' . $this->args->getQueryString());
 				}
-				Core\Hook::callAll('init_1');
+
+				$eventDispatcher->dispatch(new NamedEvent(NamedEvent::INIT));
 			}
 
 			DID::routeRequest($this->args->getCommand(), $serverVars);

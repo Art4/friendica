@@ -23,7 +23,7 @@ final class HookEventBridge implements StaticEventSubscriber
 	 *
 	 * @var \Closure|null
 	 */
-	private static $callHook = null;
+	private static $mockedCallHook = null;
 
 	/**
 	 * This maps the event names to the legacy Hook names.
@@ -75,8 +75,8 @@ final class HookEventBridge implements StaticEventSubscriber
 	private static function callHook(string $name, $data)
 	{
 		// Little hack to allow mocking the Hook call in tests.
-		if (static::$callHook instanceof \Closure) {
-			return (static::$callHook)->__invoke($name, $data);
+		if (static::$mockedCallHook instanceof \Closure) {
+			return (static::$mockedCallHook)->__invoke($name, $data);
 		}
 
 		Hook::callAll($name, $data);

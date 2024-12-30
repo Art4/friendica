@@ -57,7 +57,7 @@ class HookEventBridgeTest extends TestCase
 	{
 		$event = new DataFilterEvent('test', ['original']);
 
-		$reflectionProperty = new \ReflectionProperty(HookEventBridge::class, 'callHook');
+		$reflectionProperty = new \ReflectionProperty(HookEventBridge::class, 'mockedCallHook');
 		$reflectionProperty->setAccessible(true);
 
 		$reflectionProperty->setValue(null, function (string $name, $data) {
@@ -87,7 +87,7 @@ class HookEventBridgeTest extends TestCase
 	{
 		$event = new HtmlFilterEvent($name, 'original');
 
-		$reflectionProperty = new \ReflectionProperty(HookEventBridge::class, 'callHook');
+		$reflectionProperty = new \ReflectionProperty(HookEventBridge::class, 'mockedCallHook');
 		$reflectionProperty->setAccessible(true);
 
 		$reflectionProperty->setValue(null, function (string $name, $data) use($expected) {

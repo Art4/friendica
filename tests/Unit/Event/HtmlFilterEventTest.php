@@ -14,6 +14,24 @@ use PHPUnit\Framework\TestCase;
 
 class HtmlFilterEventTest extends TestCase
 {
+	public static function getPublicConstants(): array
+	{
+		return [
+			[HtmlFilterEvent::HEAD, 'html.head'],
+			[HtmlFilterEvent::FOOTER, 'html.footer'],
+			[HtmlFilterEvent::PAGE_CONTENT_TOP, 'html.page_content_top'],
+			[HtmlFilterEvent::PAGE_END, 'html.page_end'],
+		];
+	}
+
+	/**
+	 * @dataProvider getPublicConstants
+	 */
+	public function testPublicConstantsAreAvailable($value, $expected): void
+	{
+		$this->assertSame($expected, $value);
+	}
+
 	public function testGetNameReturnsName(): void
 	{
 		$event = new HtmlFilterEvent('test', '');

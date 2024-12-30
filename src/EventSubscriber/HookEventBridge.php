@@ -15,7 +15,7 @@ use Friendica\Event\DataFilterEvent;
 /**
  * Bridge between the EventDispatcher and the Hook class.
  */
-final class HookEventSubscriber implements StaticEventSubscriber
+final class HookEventBridge implements StaticEventSubscriber
 {
 	/**
 	 * @return array<string, string>

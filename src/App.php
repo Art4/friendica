@@ -24,7 +24,7 @@ use Friendica\Core\Worker\Repository\Process as ProcessRepository;
 use Friendica\Database\Definition\DbaDefinition;
 use Friendica\Database\Definition\ViewDefinition;
 use Friendica\DI;
-use Friendica\EventSubscriber\HookEventSubscriber;
+use Friendica\EventSubscriber\HookEventBridge;
 use Friendica\Module\Maintenance;
 use Friendica\Security\Authentication;
 use Friendica\Core\Config\Capability\IManageConfigValues;
@@ -289,8 +289,8 @@ class App
 		/** @var \Symfony\Component\EventDispatcher\EventDispatcher */
 		$eventDispatcher = $this->container->create(\Symfony\Component\EventDispatcher\EventDispatcher::class);
 
-		foreach (HookEventSubscriber::getStaticSubscribedEvents() as $eventName => $methodName) {
-			$eventDispatcher->addListener($eventName, [HookEventSubscriber::class, $methodName]);
+		foreach (HookEventBridge::getStaticSubscribedEvents() as $eventName => $methodName) {
+			$eventDispatcher->addListener($eventName, [HookEventBridge::class, $methodName]);
 		}
 	}
 

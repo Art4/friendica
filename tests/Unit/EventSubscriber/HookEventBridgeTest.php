@@ -10,17 +10,17 @@ declare(strict_types=1);
 namespace Friendica\Test\Unit\EventSubscriber;
 
 use Friendica\Event\DataFilterEvent;
-use Friendica\EventSubscriber\HookEventSubscriber;
+use Friendica\EventSubscriber\HookEventBridge;
 use Friendica\EventSubscriber\StaticEventSubscriber;
 use PHPUnit\Framework\TestCase;
 
-class HookEventSubscriberTest extends TestCase
+class HookEventBridgeTest extends TestCase
 {
 	public function testCorrectImplementation(): void
 	{
 		$this->assertTrue(
-			is_subclass_of(HookEventSubscriber::class, StaticEventSubscriber::class, true),
-			HookEventSubscriber::class . ' does not implement ' . StaticEventSubscriber::class
+			is_subclass_of(HookEventBridge::class, StaticEventSubscriber::class, true),
+			HookEventBridge::class . ' does not implement ' . StaticEventSubscriber::class
 		);
 	}
 
@@ -32,14 +32,14 @@ class HookEventSubscriberTest extends TestCase
 
 		$this->assertSame(
 			$expected,
-			HookEventSubscriber::getStaticSubscribedEvents()
+			HookEventBridge::getStaticSubscribedEvents()
 		);
 
 		foreach ($expected as $methodName) {
-			$this->assertTrue(method_exists(HookEventSubscriber::class, $methodName));
+			$this->assertTrue(method_exists(HookEventBridge::class, $methodName));
 
 			$this->assertTrue(
-				(new \ReflectionMethod(HookEventSubscriber::class, $methodName))->isStatic(),
+				(new \ReflectionMethod(HookEventBridge::class, $methodName))->isStatic(),
 				$methodName . ' is not static'
 			);
 		}

@@ -21,9 +21,7 @@ final class HookEventBridge implements StaticEventSubscriber
 	/**
 	 * This allows us to mock the Hook call in tests.
 	 *
-	 * @param string|array $data
-	 *
-	 * @return string|array
+	 * @var \Closure|null
 	 */
 	private static $callHook = null;
 

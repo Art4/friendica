@@ -53,15 +53,26 @@ class HookEventBridgeTest extends TestCase
 		}
 	}
 
-	public function testOnNamedEventCallsHook(): void
+	public static function getNamedEventData(): array
 	{
-		$event = new NamedEvent('test');
+		return [
+			['test', 'test'],
+			[NamedEvent::INIT, 'init_1'],
+		];
+	}
+
+	/**
+	 * @dataProvider getNamedEventData
+	 */
+	public function testOnNamedEventCallsHook($name, $expected): void
+	{
+		$event = new NamedEvent($name);
 
 		$reflectionProperty = new \ReflectionProperty(HookEventBridge::class, 'mockedCallHook');
 		$reflectionProperty->setAccessible(true);
 
-		$reflectionProperty->setValue(null, function (string $name, $data) {
-			$this->assertSame('test', $name);
+		$reflectionProperty->setValue(null, function (string $name, $data) use ($expected) {
+			$this->assertSame($expected, $name);
 			$this->assertSame('', $data);
 
 			return $data;
@@ -73,6 +84,7 @@ class HookEventBridgeTest extends TestCase
 	public static function getHtmlFilterEventData(): array
 	{
 		return [
+			['test', 'test'],
 			[HtmlFilterEvent::HEAD, 'head'],
 			[HtmlFilterEvent::FOOTER, 'footer'],
 			[HtmlFilterEvent::PAGE_CONTENT_TOP, 'page_content_top'],

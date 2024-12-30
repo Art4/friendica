@@ -29,6 +29,7 @@ final class HookEventBridge implements StaticEventSubscriber
 	 * This maps the new event names to the legacy Hook names.
 	 */
 	private static array $eventMapper = [
+		NamedEvent::INIT => 'init_1',
 		HtmlFilterEvent::HEAD => 'head',
 		HtmlFilterEvent::FOOTER => 'footer',
 		HtmlFilterEvent::PAGE_CONTENT_TOP => 'page_content_top',

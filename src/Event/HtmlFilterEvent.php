@@ -14,13 +14,13 @@ namespace Friendica\Event;
  */
 final class HtmlFilterEvent
 {
-	public const HEAD = 'html.head';
+	public const HEAD = 'friendica.html.head';
 
-	public const FOOTER = 'html.footer';
+	public const FOOTER = 'friendica.html.footer';
 
-	public const PAGE_CONTENT_TOP = 'html.page_content_top';
+	public const PAGE_CONTENT_TOP = 'friendica.html.page_content_top';
 
-	public const PAGE_END = 'html.page_end';
+	public const PAGE_END = 'friendica.html.page_end';
 
 	private string $name;
 

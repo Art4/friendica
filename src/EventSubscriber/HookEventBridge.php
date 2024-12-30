@@ -10,8 +10,8 @@ declare(strict_types=1);
 namespace Friendica\EventSubscriber;
 
 use Friendica\Core\Hook;
-use Friendica\Event\DataFilterEvent;
 use Friendica\Event\HtmlFilterEvent;
+use Friendica\Event\NamedEvent;
 
 /**
  * Bridge between the EventDispatcher and the Hook class.
@@ -26,7 +26,7 @@ final class HookEventBridge implements StaticEventSubscriber
 	private static $mockedCallHook = null;
 
 	/**
-	 * This maps the event names to the legacy Hook names.
+	 * This maps the new event names to the legacy Hook names.
 	 */
 	private static array $eventMapper = [
 		HtmlFilterEvent::HEAD => 'head',
@@ -41,7 +41,7 @@ final class HookEventBridge implements StaticEventSubscriber
 	public static function getStaticSubscribedEvents(): array
 	{
 		return [
-			DataFilterEvent::class => 'onDataFilterEvent',
+			NamedEvent::class => 'onNamedEvent',
 			HtmlFilterEvent::HEAD => 'onHtmlFilterEvent',
 			HtmlFilterEvent::FOOTER => 'onHtmlFilterEvent',
 			HtmlFilterEvent::PAGE_CONTENT_TOP => 'onHtmlFilterEvent',
@@ -49,11 +49,13 @@ final class HookEventBridge implements StaticEventSubscriber
 		];
 	}
 
-	public static function onDataFilterEvent(DataFilterEvent $event): void
+	public static function onNamedEvent(NamedEvent $event): void
 	{
-		$event->setData(
-			static::callHook($event->getName(), $event->getData())
-		);
+		$name = $event->getName();
+
+		$name = static::$eventMapper[$name] ?? $name;
+
+		static::callHook($name, '');
 	}
 
 	public static function onHtmlFilterEvent(HtmlFilterEvent $event): void

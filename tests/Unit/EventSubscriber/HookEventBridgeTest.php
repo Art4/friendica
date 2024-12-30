@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Friendica\Test\Unit\EventSubscriber;
 
-use Friendica\Event\DataFilterEvent;
 use Friendica\Event\HtmlFilterEvent;
+use Friendica\Event\NamedEvent;
 use Friendica\EventSubscriber\HookEventBridge;
 use Friendica\EventSubscriber\StaticEventSubscriber;
 use PHPUnit\Framework\TestCase;
@@ -28,7 +28,7 @@ class HookEventBridgeTest extends TestCase
 	public function testGetStaticSubscribedEventsReturnsStaticMethods(): void
 	{
 		$expected = [
-			DataFilterEvent::class => 'onDataFilterEvent',
+			NamedEvent::class => 'onNamedEvent',
 			HtmlFilterEvent::HEAD => 'onHtmlFilterEvent',
 			HtmlFilterEvent::FOOTER => 'onHtmlFilterEvent',
 			HtmlFilterEvent::PAGE_CONTENT_TOP => 'onHtmlFilterEvent',
@@ -53,21 +53,21 @@ class HookEventBridgeTest extends TestCase
 		}
 	}
 
-	public function testOnDataFilterEventCallsHook(): void
+	public function testOnNamedEventCallsHook(): void
 	{
-		$event = new DataFilterEvent('test', ['original']);
+		$event = new NamedEvent('test');
 
 		$reflectionProperty = new \ReflectionProperty(HookEventBridge::class, 'mockedCallHook');
 		$reflectionProperty->setAccessible(true);
 
 		$reflectionProperty->setValue(null, function (string $name, $data) {
 			$this->assertSame('test', $name);
-			$this->assertSame(['original'], $data);
+			$this->assertSame('', $data);
 
 			return $data;
 		});
 
-		HookEventBridge::onDataFilterEvent($event);
+		HookEventBridge::onNamedEvent($event);
 	}
 
 	public static function getHtmlFilterEventData(): array

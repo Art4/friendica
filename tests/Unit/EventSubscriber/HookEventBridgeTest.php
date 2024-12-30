@@ -52,4 +52,36 @@ class HookEventBridgeTest extends TestCase
 			);
 		}
 	}
+
+	public function testOnDataFilterEventCallsHook(): void
+	{
+		$event = new DataFilterEvent('test', ['original']);
+
+		$reflectionProperty = new \ReflectionProperty(HookEventBridge::class, 'callHook');
+
+		$reflectionProperty->setValue(null, function (string $name, $data) {
+			$this->assertSame('test', $name);
+			$this->assertSame(['original'], $data);
+
+			return $data;
+		});
+
+		HookEventBridge::onDataFilterEvent($event);
+	}
+
+	public function testOnHtmlFilterEventCallsHook(): void
+	{
+		$event = new HtmlFilterEvent('test', 'original');
+
+		$reflectionProperty = new \ReflectionProperty(HookEventBridge::class, 'callHook');
+
+		$reflectionProperty->setValue(null, function (string $name, $data) {
+			$this->assertSame('test', $name);
+			$this->assertSame('original', $data);
+
+			return $data;
+		});
+
+		HookEventBridge::onHtmlFilterEvent($event);
+	}
 }

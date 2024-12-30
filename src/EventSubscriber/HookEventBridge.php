@@ -19,6 +19,15 @@ use Friendica\Event\HtmlFilterEvent;
 final class HookEventBridge implements StaticEventSubscriber
 {
 	/**
+	 * This allows us to mock the Hook call in tests.
+	 *
+	 * @param string|array $data
+	 *
+	 * @return string|array
+	 */
+	private static $callHook = null;
+
+	/**
 	 * @return array<string, string>
 	 */
 	public static function getStaticSubscribedEvents(): array
@@ -34,19 +43,32 @@ final class HookEventBridge implements StaticEventSubscriber
 
 	public static function onDataFilterEvent(DataFilterEvent $event): void
 	{
-		$data = $event->getData();
-
-		Hook::callAll($event->getName(), $data);
-
-		$event->setData($data);
+		$event->setData(
+			static::callHook($event->getName(), $event->getData())
+		);
 	}
 
 	public static function onHtmlFilterEvent(HtmlFilterEvent $event): void
 	{
-		$html = $event->getHtml();
+		$event->setHtml(
+			static::callHook($event->getName(), $event->getHtml())
+		);
+	}
 
-		// Hook::callAll($event->getName(), $html);
+	/**
+	 * @param string|array $data
+	 *
+	 * @return string|array
+	 */
+	private static function callHook(string $name, $data)
+	{
+		// Little hack to allow mocking the Hook call in tests.
+		if (static::$callHook instanceof \Closure) {
+			return (static::$callHook)->__invoke($name, $data);
+		}
 
-		$event->setHtml($html);
+		Hook::callAll($name, $data);
+
+		return $data;
 	}
 }

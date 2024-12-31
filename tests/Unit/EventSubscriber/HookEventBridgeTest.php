@@ -29,10 +29,7 @@ class HookEventBridgeTest extends TestCase
 	{
 		$expected = [
 			NamedEvent::class => 'onNamedEvent',
-			HtmlFilterEvent::HEAD => 'onHtmlFilterEvent',
-			HtmlFilterEvent::FOOTER => 'onHtmlFilterEvent',
-			HtmlFilterEvent::PAGE_CONTENT_TOP => 'onHtmlFilterEvent',
-			HtmlFilterEvent::PAGE_END => 'onHtmlFilterEvent',
+			HtmlFilterEvent::class => 'onHtmlFilterEvent',
 		];
 
 		$this->assertSame(
@@ -40,7 +37,7 @@ class HookEventBridgeTest extends TestCase
 			HookEventBridge::getStaticSubscribedEvents()
 		);
 
-		foreach (array_keys(array_flip($expected)) as $methodName) {
+		foreach ($expected as $methodName) {
 			$this->assertTrue(
 				method_exists(HookEventBridge::class, $methodName),
 				$methodName . '() is not defined'

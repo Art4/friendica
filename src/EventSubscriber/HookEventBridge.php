@@ -43,10 +43,7 @@ final class HookEventBridge implements StaticEventSubscriber
 	{
 		return [
 			NamedEvent::class => 'onNamedEvent',
-			HtmlFilterEvent::HEAD => 'onHtmlFilterEvent',
-			HtmlFilterEvent::FOOTER => 'onHtmlFilterEvent',
-			HtmlFilterEvent::PAGE_CONTENT_TOP => 'onHtmlFilterEvent',
-			HtmlFilterEvent::PAGE_END => 'onHtmlFilterEvent',
+			HtmlFilterEvent::class => 'onHtmlFilterEvent',
 		];
 	}
 

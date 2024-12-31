@@ -288,7 +288,7 @@ class App
 	private function registerEventDispatcher(): void
 	{
 		/** @var \Symfony\Component\EventDispatcher\EventDispatcher */
-		$eventDispatcher = $this->container->create(\Symfony\Component\EventDispatcher\EventDispatcher::class);
+		$eventDispatcher = $this->container->create(EventDispatcherInterface::class);
 
 		foreach (HookEventBridge::getStaticSubscribedEvents() as $eventName => $methodName) {
 			$eventDispatcher->addListener($eventName, [HookEventBridge::class, $methodName]);

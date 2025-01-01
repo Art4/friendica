@@ -23,6 +23,7 @@ use Friendica\Core\Session\Capability\IHandleUserSessions;
 use Friendica\Core\Worker\Repository\Process as ProcessRepository;
 use Friendica\Database\Definition\DbaDefinition;
 use Friendica\Database\Definition\ViewDefinition;
+use Friendica\Event\Event;
 use Friendica\Event\NamedEvent;
 use Friendica\EventSubscriber\HookEventBridge;
 use Friendica\Module\Maintenance;
@@ -421,7 +422,7 @@ class App
 					System::externalRedirect($this->baseURL . '/' . $this->args->getQueryString());
 				}
 
-				$eventDispatcher->dispatch(new NamedEvent(NamedEvent::INIT));
+				$eventDispatcher->dispatch(new Event(Event::INIT));
 			}
 
 			DID::routeRequest($this->args->getCommand(), $serverVars);

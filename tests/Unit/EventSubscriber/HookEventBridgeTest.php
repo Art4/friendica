@@ -28,8 +28,11 @@ class HookEventBridgeTest extends TestCase
 	public function testGetStaticSubscribedEventsReturnsStaticMethods(): void
 	{
 		$expected = [
-			Event::class => 'onNamedEvent',
-			HtmlFilterEvent::class => 'onHtmlFilterEvent',
+			Event::INIT => 'onNamedEvent',
+			HtmlFilterEvent::HEAD => 'onHtmlFilterEvent',
+			HtmlFilterEvent::FOOTER => 'onHtmlFilterEvent',
+			HtmlFilterEvent::PAGE_CONTENT_TOP => 'onHtmlFilterEvent',
+			HtmlFilterEvent::PAGE_END => 'onHtmlFilterEvent',
 		];
 
 		$this->assertSame(

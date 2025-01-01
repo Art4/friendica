@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Friendica\Test\Unit\EventSubscriber;
 
+use Friendica\Event\Event;
 use Friendica\Event\HtmlFilterEvent;
-use Friendica\Event\NamedEvent;
 use Friendica\EventSubscriber\HookEventBridge;
 use Friendica\EventSubscriber\StaticEventSubscriber;
 use PHPUnit\Framework\TestCase;
@@ -28,7 +28,7 @@ class HookEventBridgeTest extends TestCase
 	public function testGetStaticSubscribedEventsReturnsStaticMethods(): void
 	{
 		$expected = [
-			NamedEvent::class => 'onNamedEvent',
+			Event::class => 'onNamedEvent',
 			HtmlFilterEvent::class => 'onHtmlFilterEvent',
 		];
 
@@ -54,7 +54,7 @@ class HookEventBridgeTest extends TestCase
 	{
 		return [
 			['test', 'test'],
-			[NamedEvent::INIT, 'init_1'],
+			[Event::INIT, 'init_1'],
 		];
 	}
 
@@ -63,7 +63,7 @@ class HookEventBridgeTest extends TestCase
 	 */
 	public function testOnNamedEventCallsHook($name, $expected): void
 	{
-		$event = new NamedEvent($name);
+		$event = new Event($name);
 
 		$reflectionProperty = new \ReflectionProperty(HookEventBridge::class, 'mockedCallHook');
 		$reflectionProperty->setAccessible(true);

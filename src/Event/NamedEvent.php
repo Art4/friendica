@@ -10,24 +10,9 @@ declare(strict_types=1);
 namespace Friendica\Event;
 
 /**
- * One-way Event to inform listener about something happend.
+ * Interface for named events.
  */
-final class NamedEvent
+interface NamedEvent
 {
-	/**
-	 * Friendica is initialized.
-	 */
-	public const INIT = 'friendica.init';
-
-	private string $name;
-
-	public function __construct(string $name)
-	{
-		$this->name = $name;
-	}
-
-	public function getName(): string
-	{
-		return $this->name;
-	}
+	public function getName(): string;
 }

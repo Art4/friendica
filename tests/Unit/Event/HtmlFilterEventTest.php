@@ -10,10 +10,18 @@ declare(strict_types=1);
 namespace Friendica\Test\Unit\Event;
 
 use Friendica\Event\HtmlFilterEvent;
+use Friendica\Event\NamedEvent;
 use PHPUnit\Framework\TestCase;
 
 class HtmlFilterEventTest extends TestCase
 {
+	public function testImplementationOfInstances(): void
+	{
+		$event = new HtmlFilterEvent('test', 'original');
+
+		$this->assertInstanceOf(NamedEvent::class, $event);
+	}
+
 	public static function getPublicConstants(): array
 	{
 		return [

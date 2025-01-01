@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Friendica\EventSubscriber;
 
 use Friendica\Core\Hook;
+use Friendica\Event\Event;
 use Friendica\Event\HtmlFilterEvent;
 use Friendica\Event\NamedEvent;
 
@@ -29,7 +30,7 @@ final class HookEventBridge implements StaticEventSubscriber
 	 * This maps the new event names to the legacy Hook names.
 	 */
 	private static array $eventMapper = [
-		NamedEvent::INIT => 'init_1',
+		Event::INIT => 'init_1',
 		HtmlFilterEvent::HEAD => 'head',
 		HtmlFilterEvent::FOOTER => 'footer',
 		HtmlFilterEvent::PAGE_CONTENT_TOP => 'page_content_top',
@@ -42,7 +43,7 @@ final class HookEventBridge implements StaticEventSubscriber
 	public static function getStaticSubscribedEvents(): array
 	{
 		return [
-			NamedEvent::class => 'onNamedEvent',
+			Event::class => 'onNamedEvent',
 			HtmlFilterEvent::class => 'onHtmlFilterEvent',
 		];
 	}

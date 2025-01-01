@@ -9,15 +9,23 @@ declare(strict_types=1);
 
 namespace Friendica\Test\Unit\Event;
 
+use Friendica\Event\Event;
 use Friendica\Event\NamedEvent;
 use PHPUnit\Framework\TestCase;
 
-class NamedEventTest extends TestCase
+class EventTest extends TestCase
 {
+	public function testImplementationOfInstances(): void
+	{
+		$event = new Event('test');
+
+		$this->assertInstanceOf(NamedEvent::class, $event);
+	}
+
 	public static function getPublicConstants(): array
 	{
 		return [
-			[NamedEvent::INIT, 'friendica.init'],
+			[Event::INIT, 'friendica.init'],
 		];
 	}
 
@@ -31,7 +39,7 @@ class NamedEventTest extends TestCase
 
 	public function testGetNameReturnsName(): void
 	{
-		$event = new NamedEvent('test');
+		$event = new Event('test');
 
 		$this->assertSame('test', $event->getName());
 	}

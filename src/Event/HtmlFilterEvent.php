@@ -12,7 +12,7 @@ namespace Friendica\Event;
 /**
  * Allow Event listener to modify HTML.
  */
-final class HtmlFilterEvent
+final class HtmlFilterEvent implements NamedEvent
 {
 	public const HEAD = 'friendica.html.head';
 

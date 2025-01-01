@@ -12,7 +12,7 @@ namespace Friendica\Addon\Event;
 /**
  * Start an addon.
  */
-final class AddonStartedEvent
+final class AddonStartEvent
 {
 	public function getDependencies(): array
 	{

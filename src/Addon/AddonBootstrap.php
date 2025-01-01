@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Friendica\Addon;
 
-use Friendica\Addon\Event\AddonStartedEvent;
+use Friendica\Addon\Event\AddonStartEvent;
 use Friendica\EventSubscriber\StaticEventSubscriber;
 
 /**
@@ -25,5 +25,5 @@ interface AddonBootstrap extends StaticEventSubscriber
 	/**
 	 * Init of the addon.
 	 */
-	public static function initAddon(AddonStartedEvent $event): void;
+	public static function initAddon(AddonStartEvent $event): void;
 }

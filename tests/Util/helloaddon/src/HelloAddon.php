@@ -16,7 +16,7 @@ declare(strict_types=1);
 namespace FriendicaAddons\HelloAddon;
 
 use Friendica\Addon\Event\AddonInstallEvent;
-use Friendica\Addon\Event\AddonStartedEvent;
+use Friendica\Addon\Event\AddonStartEvent;
 use Friendica\Addon\Event\AddonUninstallEvent;
 use Friendica\Event\HtmlFilterEvent;
 use Psr\Log\LoggerInterface;
@@ -32,7 +32,7 @@ class HelloAddon implements \Friendica\Addon\AddonBootstrap
 	 *
 	 * The array should contain FQCN of the required services.
 	 *
-	 * The dependencies will be passed to the initAddon() method via AddonStartedEvent::getDependencies().
+	 * The dependencies will be passed to the initAddon() method via AddonStartEvent::getDependencies().
 	 */
 	public static function getRequiredDependencies(): array
 	{
@@ -48,7 +48,7 @@ class HelloAddon implements \Friendica\Addon\AddonBootstrap
 		];
 	}
 
-	public static function initAddon(AddonStartedEvent $event): void
+	public static function initAddon(AddonStartEvent $event): void
 	{
 		// $dependencies containts an array of services defined in getRequiredDependencies().
 		// The keys are the FQCN of the services.

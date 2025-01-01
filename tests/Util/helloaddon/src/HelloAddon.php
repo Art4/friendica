@@ -19,6 +19,7 @@ use Friendica\Addon\Event\AddonInstallEvent;
 use Friendica\Addon\Event\AddonStartEvent;
 use Friendica\Addon\Event\AddonUninstallEvent;
 use Friendica\Event\HtmlFilterEvent;
+use Friendica\Event\ProvideLoggerEvent;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -45,6 +46,7 @@ class HelloAddon implements \Friendica\Addon\AddonBootstrap
 	{
 		return [
 			HtmlFilterEvent::PAGE_END => 'onPageEnd',
+			ProvideLoggerEvent::NAME => 'onProvideLoggerEvent',
 		];
 	}
 
@@ -55,7 +57,7 @@ class HelloAddon implements \Friendica\Addon\AddonBootstrap
 		// The values are the instances of the services.
 		$dependencies = $event->getDependencies();
 
-		static::$logger = $dependencies[LoggerInterface::class] ?? new NullLogger();
+		static::$logger = $dependencies[LoggerInterface::class];
 
 		static::$logger->info('Hello from HelloAddon');
 	}
@@ -73,5 +75,10 @@ class HelloAddon implements \Friendica\Addon\AddonBootstrap
 	public static function onPageEnd(HtmlFilterEvent $event): void
 	{
 		$event->setHtml($event->getHtml() . '<p>Hello, World!</p>');
+	}
+
+	public static function onProvideLoggerEvent(ProvideLoggerEvent $event): void
+	{
+		$event->setLogger(new NullLogger());
 	}
 }

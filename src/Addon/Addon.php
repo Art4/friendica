@@ -18,14 +18,17 @@ final class Addon
 {
 	private AddonBootstrap $bootstrap;
 
-	public function __construct(AddonBootstrap $bootstrap)
+	private array $dependencies;
+
+	public function __construct(AddonBootstrap $bootstrap, array $dependencies = [])
 	{
 		$this->bootstrap = $bootstrap;
+		$this->dependencies = $dependencies;
 	}
 
 	public function initAddon(): void
 	{
-		$event = new AddonStartEvent();
+		$event = new AddonStartEvent($this->dependencies);
 
 		$this->bootstrap->initAddon($event);
 	}

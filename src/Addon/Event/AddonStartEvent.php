@@ -14,8 +14,15 @@ namespace Friendica\Addon\Event;
  */
 final class AddonStartEvent
 {
+	private array $dependencies;
+
+	public function __construct(array $dependencies)
+	{
+		$this->dependencies = $dependencies;
+	}
+
 	public function getDependencies(): array
 	{
-		return [];
+		return $this->dependencies;
 	}
 }

@@ -13,6 +13,7 @@ use Friendica\Addon\Addon;
 use Friendica\Addon\AddonBootstrap;
 use Friendica\Addon\Event\AddonStartEvent;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 class AddonTest extends TestCase
 {
@@ -33,6 +34,25 @@ class AddonTest extends TestCase
 		});
 
 		$addon = new Addon($bootstrap);
+		$addon->initAddon();
+	}
+
+	public function testInitAddonCallsBootstrapWithDependencies(): void
+	{
+		$bootstrap = $this->createMock(AddonBootstrap::class);
+
+		$bootstrap->expects($this->once())->method('initAddon')->willReturnCallback(function(AddonStartEvent $event) {
+			$dependencies = $event->getDependencies();
+
+			$this->assertArrayHasKey(LoggerInterface::class, $dependencies);
+			$this->assertInstanceOf(LoggerInterface::class, $dependencies[LoggerInterface::class]);
+		});
+
+		$addon = new Addon(
+			$bootstrap,
+			[LoggerInterface::class => $this->createMock(LoggerInterface::class)]
+		);
+
 		$addon->initAddon();
 	}
 }

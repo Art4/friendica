@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace FriendicaAddons\HelloAddon;
 
+use Friendica\Addon\AddonBootstrap;
 use Friendica\Addon\Event\AddonInstallEvent;
 use Friendica\Addon\Event\AddonStartEvent;
 use Friendica\Addon\Event\AddonUninstallEvent;
@@ -23,7 +24,7 @@ use Friendica\Event\ProvideLoggerEvent;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-class HelloAddon implements \Friendica\Addon\AddonBootstrap
+class HelloAddon implements AddonBootstrap
 {
 	/** @var LoggerInterface */
 	private static $logger;
@@ -50,7 +51,7 @@ class HelloAddon implements \Friendica\Addon\AddonBootstrap
 		];
 	}
 
-	public static function initAddon(AddonStartEvent $event): void
+	public function initAddon(AddonStartEvent $event): void
 	{
 		// $dependencies containts an array of services defined in getRequiredDependencies().
 		// The keys are the FQCN of the services.

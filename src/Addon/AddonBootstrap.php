@@ -25,5 +25,5 @@ interface AddonBootstrap extends StaticEventSubscriber
 	/**
 	 * Init of the addon.
 	 */
-	public static function initAddon(AddonStartEvent $event): void;
+	public function initAddon(AddonStartEvent $event): void;
 }

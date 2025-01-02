@@ -272,6 +272,17 @@ class App
 
 	private function setupContainerForAddons(): void
 	{
+		$config = $this->container->create(IManageConfigValues::class);
+
+		/** @var \Friendica\Addon\AddonManager $addonManager */
+		$addonManager = $this->container->create(\Friendica\Addon\AddonManager::class);
+
+		$addonManager->bootstrapAddons($config->get('addons') ?? []);
+
+		// At this place we should be careful because addons can change the container
+		// Maybe we should create a new container especially for the addons
+		$this->container = $this->container->addRules($addonManager->getProvidedDependencyRules());
+
 		/** @var \Friendica\Core\Addon\Capability\ICanLoadAddons $addonLoader */
 		$addonLoader = $this->container->create(\Friendica\Core\Addon\Capability\ICanLoadAddons::class);
 

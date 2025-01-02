@@ -34,7 +34,8 @@ class AddonTest extends TestCase
 		});
 
 		$addon = new Addon($bootstrap);
-		$addon->initAddon();
+
+		$addon->initAddon([]);
 	}
 
 	public function testInitAddonCallsBootstrapWithDependencies(): void
@@ -48,11 +49,10 @@ class AddonTest extends TestCase
 			$this->assertInstanceOf(LoggerInterface::class, $dependencies[LoggerInterface::class]);
 		});
 
-		$addon = new Addon(
-			$bootstrap,
+		$addon = new Addon($bootstrap);
+
+		$addon->initAddon(
 			[LoggerInterface::class => $this->createMock(LoggerInterface::class)]
 		);
-
-		$addon->initAddon();
 	}
 }

@@ -165,6 +165,11 @@ return (function(string $basepath, array $getVars, array $serverVars, array $coo
 		\Psr\EventDispatcher\EventDispatcherInterface::class => [
 			'instanceOf' => \Friendica\Event\EventDispatcher::class,
 		],
+		\Friendica\Addon\AddonManager::class => [
+			'constructParams' => [
+				$basepath . '/addon',
+			],
+		],
 		\Friendica\Core\Logger\Type\SyslogLogger::class => [
 			'instanceOf' => \Friendica\Core\Logger\Factory\SyslogLogger::class,
 			'call' => [

@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace FriendicaAddons\HelloAddon;
 
 use Friendica\Addon\AddonBootstrap;
+use Friendica\Addon\DependencyProvider;
 use Friendica\Addon\Event\AddonInstallEvent;
 use Friendica\Addon\Event\AddonStartEvent;
 use Friendica\Addon\Event\AddonUninstallEvent;
@@ -24,7 +25,7 @@ use Friendica\Event\ProvideLoggerEvent;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-class HelloAddon implements AddonBootstrap
+class HelloAddon implements AddonBootstrap, DependencyProvider
 {
 	/** @var LoggerInterface */
 	private static $logger;
@@ -47,8 +48,29 @@ class HelloAddon implements AddonBootstrap
 	{
 		return [
 			HtmlFilterEvent::PAGE_END => 'onPageEnd',
-			ProvideLoggerEvent::NAME => 'onProvideLoggerEvent',
 		];
+	}
+
+	/**
+	 * Returns an array of Dice rules.
+	 */
+	public function provideDependencyRules(): array
+	{
+		// or return require($path_to_dependencies_file);
+		return [
+			LoggerInterface::class => [
+				'instanceOf' => NullLogger::class,
+			],
+		];
+	}
+
+	/**
+	 * Returns an array of strategy rules.
+	 */
+	public function provideStrategyRules(): array
+	{
+		// or return require($path_to_strategies_file);
+		return [];
 	}
 
 	public function initAddon(AddonStartEvent $event): void
@@ -76,10 +98,5 @@ class HelloAddon implements AddonBootstrap
 	public static function onPageEnd(HtmlFilterEvent $event): void
 	{
 		$event->setHtml($event->getHtml() . '<p>Hello, World!</p>');
-	}
-
-	public static function onProvideLoggerEvent(ProvideLoggerEvent $event): void
-	{
-		$event->setLogger(new NullLogger());
 	}
 }

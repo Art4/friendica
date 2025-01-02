@@ -39,6 +39,18 @@ final class AddonManager
 		}
 	}
 
+	public function getAllRequiredDependencies(): array
+	{
+		$dependencies = [];
+
+		foreach ($this->addons as $addon) {
+			// Here we can filter or deny dependencies from addons
+			$dependencies = array_merge($dependencies, $addon->getRequiredDependencies());
+		}
+
+		return array_unique($dependencies);
+	}
+
 	public function getProvidedDependencyRules(): array
 	{
 		$dependencyRules = [];
@@ -71,5 +83,23 @@ final class AddonManager
 		$this->addons[$addonName] = new Addon($bootstrap);
 
 		$this->logger->info(sprintf('Addon "%s" loaded.', $addonName));
+	}
+
+	public function initAddons(array $dependencies): void
+	{
+		foreach ($this->addons as $addon) {
+			$required = $addon->getRequiredDependencies();
+			$addonDependencies = [];
+
+			foreach ($required as $dependency) {
+				if (!array_key_exists($dependency, $dependencies)) {
+					throw new \RuntimeException(sprintf('Dependency "%s" required by addon "%s" not found.', $dependency, $addon));
+				}
+
+				$addonDependencies[$dependency] = $dependencies[$dependency];
+			}
+
+			$addon->initAddon($addonDependencies);
+		}
 	}
 }

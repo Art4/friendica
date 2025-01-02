@@ -60,6 +60,7 @@ class HelloAddon implements AddonBootstrap, DependencyProvider
 		return [
 			LoggerInterface::class => [
 				'instanceOf' => NullLogger::class,
+				'call' => null,
 			],
 		];
 	}

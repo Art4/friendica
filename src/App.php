@@ -287,6 +287,14 @@ class App
 		$addonLoader = $this->container->create(\Friendica\Core\Addon\Capability\ICanLoadAddons::class);
 
 		$this->container = $this->container->addRules($addonLoader->getActiveAddonConfig('dependencies'));
+
+		$dependencies = [];
+
+		foreach ($addonManager->getAllRequiredDependencies() as $dependency) {
+			$dependencies[$dependency] = $this->container->create($dependency);
+		}
+
+		$addonManager->initAddons($dependencies);
 	}
 
 	private function setupContainerForLogger(string $logChannel): void

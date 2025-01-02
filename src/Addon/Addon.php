@@ -23,6 +23,11 @@ final class Addon
 		$this->bootstrap = $bootstrap;
 	}
 
+	public function getRequiredDependencies(): array
+	{
+		return $this->bootstrap::getRequiredDependencies();
+	}
+
 	public function getProvidedDependencyRules(): array
 	{
 		if ($this->bootstrap instanceof DependencyProvider) {

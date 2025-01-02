@@ -30,11 +30,11 @@ final class HookEventBridge implements StaticEventSubscriber
 	 * This maps the new event names to the legacy Hook names.
 	 */
 	private static array $eventMapper = [
-		Event::INIT => 'init_1',
-		HtmlFilterEvent::HEAD => 'head',
-		HtmlFilterEvent::FOOTER => 'footer',
+		Event::INIT                       => 'init_1',
+		HtmlFilterEvent::HEAD             => 'head',
+		HtmlFilterEvent::FOOTER           => 'footer',
 		HtmlFilterEvent::PAGE_CONTENT_TOP => 'page_content_top',
-		HtmlFilterEvent::PAGE_END => 'page_end',
+		HtmlFilterEvent::PAGE_END         => 'page_end',
 	];
 
 	/**
@@ -43,11 +43,11 @@ final class HookEventBridge implements StaticEventSubscriber
 	public static function getStaticSubscribedEvents(): array
 	{
 		return [
-			Event::INIT => 'onNamedEvent',
-			HtmlFilterEvent::HEAD => 'onHtmlFilterEvent',
-			HtmlFilterEvent::FOOTER => 'onHtmlFilterEvent',
+			Event::INIT                       => 'onNamedEvent',
+			HtmlFilterEvent::HEAD             => 'onHtmlFilterEvent',
+			HtmlFilterEvent::FOOTER           => 'onHtmlFilterEvent',
 			HtmlFilterEvent::PAGE_CONTENT_TOP => 'onHtmlFilterEvent',
-			HtmlFilterEvent::PAGE_END => 'onHtmlFilterEvent',
+			HtmlFilterEvent::PAGE_END         => 'onHtmlFilterEvent',
 		];
 	}
 

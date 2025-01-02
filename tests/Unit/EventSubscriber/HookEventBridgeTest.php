@@ -28,11 +28,11 @@ class HookEventBridgeTest extends TestCase
 	public function testGetStaticSubscribedEventsReturnsStaticMethods(): void
 	{
 		$expected = [
-			Event::INIT => 'onNamedEvent',
-			HtmlFilterEvent::HEAD => 'onHtmlFilterEvent',
-			HtmlFilterEvent::FOOTER => 'onHtmlFilterEvent',
+			Event::INIT                       => 'onNamedEvent',
+			HtmlFilterEvent::HEAD             => 'onHtmlFilterEvent',
+			HtmlFilterEvent::FOOTER           => 'onHtmlFilterEvent',
 			HtmlFilterEvent::PAGE_CONTENT_TOP => 'onHtmlFilterEvent',
-			HtmlFilterEvent::PAGE_END => 'onHtmlFilterEvent',
+			HtmlFilterEvent::PAGE_END         => 'onHtmlFilterEvent',
 		];
 
 		$this->assertSame(
@@ -102,7 +102,7 @@ class HookEventBridgeTest extends TestCase
 		$reflectionProperty = new \ReflectionProperty(HookEventBridge::class, 'mockedCallHook');
 		$reflectionProperty->setAccessible(true);
 
-		$reflectionProperty->setValue(null, function (string $name, $data) use($expected) {
+		$reflectionProperty->setValue(null, function (string $name, $data) use ($expected) {
 			$this->assertSame($expected, $name);
 			$this->assertSame('original', $data);
 

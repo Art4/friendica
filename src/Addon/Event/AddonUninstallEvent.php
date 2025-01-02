@@ -14,5 +14,4 @@ namespace Friendica\Addon\Event;
  */
 final class AddonUninstallEvent
 {
-
 }

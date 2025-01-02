@@ -27,7 +27,7 @@ final class ProvideLoggerEvent implements NamedEvent
 
 	public function __construct(LoggerInterface $logger)
 	{
-		$this->name = self::NAME;
+		$this->name   = self::NAME;
 		$this->logger = $logger;
 	}
 

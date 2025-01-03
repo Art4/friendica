@@ -7,8 +7,9 @@
 
 declare(strict_types=1);
 
-namespace Friendica\Addon;
+namespace Friendica\Service\Addon;
 
+use Friendica\Addon\AddonBootstrap;
 use Friendica\Addon\Event\AddonStartEvent;
 
 /**

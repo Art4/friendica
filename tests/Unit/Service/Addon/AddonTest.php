@@ -9,9 +9,9 @@ declare(strict_types=1);
 
 namespace Friendica\Test\Unit\Addon;
 
-use Friendica\Addon\Addon;
 use Friendica\Addon\AddonBootstrap;
 use Friendica\Addon\Event\AddonStartEvent;
+use Friendica\Service\Addon\Addon;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 

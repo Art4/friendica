@@ -274,8 +274,8 @@ class App
 	{
 		$config = $this->container->create(IManageConfigValues::class);
 
-		/** @var \Friendica\Addon\AddonManager $addonManager */
-		$addonManager = $this->container->create(\Friendica\Addon\AddonManager::class);
+		/** @var \Friendica\Service\Addon\AddonManager $addonManager */
+		$addonManager = $this->container->create(\Friendica\Service\Addon\AddonManager::class);
 
 		$addonManager->bootstrapAddons($config->get('addons') ?? []);
 

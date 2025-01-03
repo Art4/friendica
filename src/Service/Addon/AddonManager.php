@@ -7,8 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Friendica\Addon;
+namespace Friendica\Service\Addon;
 
+use Friendica\Addon\Addon;
+use Friendica\Addon\AddonBootstrap;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -34,7 +36,7 @@ final class AddonManager
 			try {
 				$this->bootstrapAddon($addonName);
 			} catch (\Throwable $th) {
-				// throw $th;
+				throw $th;
 			}
 		}
 	}

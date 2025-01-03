@@ -7,21 +7,21 @@
 
 declare(strict_types=1);
 
-namespace Friendica\Test\Unit\Addon;
+namespace Friendica\Test\Unit\Service\Addon;
 
-use Friendica\Addon\AddonManager;
+use Friendica\Service\Addon\AddonManager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 class AddonManagerTest extends TestCase
 {
-	public function testLoadAddon(): void
+	public function testBootstrapAddonsLoadsTheAddon(): void
 	{
 		$logger = $this->createMock(LoggerInterface::class);
 		$logger->expects($this->once())->method('info')->with('Addon "helloaddon" loaded.');
 
 		$manager = new AddonManager(
-			dirname(__DIR__, 2) . '/Util',
+			dirname(__DIR__, 3) . '/Util',
 			$logger
 		);
 

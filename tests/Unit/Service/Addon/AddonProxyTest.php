@@ -10,11 +10,17 @@ declare(strict_types=1);
 namespace Friendica\Test\Unit\Addon;
 
 use Friendica\Addon\AddonBootstrap;
+use Friendica\Addon\DependencyProvider;
 use Friendica\Addon\Event\AddonStartEvent;
 use Friendica\Service\Addon\Addon;
 use Friendica\Service\Addon\AddonProxy;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+
+/**
+ * Helper interface to combine AddonBootstrap and DependencyProvider.
+ */
+interface CombinedAddonBootstrapDependencyProvider extends AddonBootstrap, DependencyProvider {}
 
 class AddonProxyTest extends TestCase
 {
@@ -25,6 +31,26 @@ class AddonProxyTest extends TestCase
 		$addon = new AddonProxy($bootstrap);
 
 		$this->assertInstanceOf(Addon::class, $addon);
+	}
+
+	public function testGetRequiredDependenciesCallsBootstrap(): void
+	{
+		$bootstrap = $this->createMock(AddonBootstrap::class);
+		$bootstrap->expects($this->once())->method('getRequiredDependencies')->willReturn([]);
+
+		$addon = new AddonProxy($bootstrap);
+
+		$addon->getRequiredDependencies();
+	}
+
+	public function testGetProvidedDependencyRulesCallsBootstrap(): void
+	{
+		$bootstrap = $this->createMock(CombinedAddonBootstrapDependencyProvider::class);
+		$bootstrap->expects($this->once())->method('provideDependencyRules')->willReturn([]);
+
+		$addon = new AddonProxy($bootstrap);
+
+		$addon->getProvidedDependencyRules();
 	}
 
 	public function testInitAddonCallsBootstrap(): void

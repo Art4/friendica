@@ -17,10 +17,10 @@ interface DependencyProvider
 	/**
 	 * Returns an array of Dice rules.
 	 */
-	public static function provideDependencyRules(): array;
+	public function provideDependencyRules(): array;
 
 	/**
 	 * Returns an array of strategy rules.
 	 */
-	public static function provideStrategyRules(): array;
+	public function provideStrategyRules(): array;
 }

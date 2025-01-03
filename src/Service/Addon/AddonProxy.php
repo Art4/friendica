@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Friendica\Service\Addon;
 
 use Friendica\Addon\AddonBootstrap;
+use Friendica\Addon\DependencyProvider;
 use Friendica\Addon\Event\AddonStartEvent;
 
 /**
@@ -26,13 +27,13 @@ final class AddonProxy implements Addon
 
 	public function getRequiredDependencies(): array
 	{
-		return $this->bootstrap::getRequiredDependencies();
+		return $this->bootstrap->getRequiredDependencies();
 	}
 
 	public function getProvidedDependencyRules(): array
 	{
 		if ($this->bootstrap instanceof DependencyProvider) {
-			return $this->bootstrap::provideDependencyRules();
+			return $this->bootstrap->provideDependencyRules();
 		}
 
 		return [];

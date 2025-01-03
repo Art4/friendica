@@ -35,7 +35,7 @@ class HelloAddon implements AddonBootstrap, DependencyProvider
 	 *
 	 * The dependencies will be passed to the initAddon() method via AddonStartEvent::getDependencies().
 	 */
-	public static function getRequiredDependencies(): array
+	public function getRequiredDependencies(): array
 	{
 		return [
 			LoggerInterface::class,
@@ -56,7 +56,7 @@ class HelloAddon implements AddonBootstrap, DependencyProvider
 	 *
 	 * @return array<string, string>
 	 */
-	public static function getSubscribedEvents(): array
+	public function getSubscribedEvents(): array
 	{
 		return [
 			HtmlFilterEvent::PAGE_END => 'onPageEnd',
@@ -66,7 +66,7 @@ class HelloAddon implements AddonBootstrap, DependencyProvider
 	/**
 	 * Returns an array of Dice rules.
 	 */
-	public static function provideDependencyRules(): array
+	public function provideDependencyRules(): array
 	{
 		// or return require($path_to_dependencies_file);
 		return [
@@ -80,7 +80,7 @@ class HelloAddon implements AddonBootstrap, DependencyProvider
 	/**
 	 * Returns an array of strategy rules.
 	 */
-	public static function provideStrategyRules(): array
+	public function provideStrategyRules(): array
 	{
 		// or return require($path_to_strategies_file);
 		return [];

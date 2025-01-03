@@ -36,6 +36,7 @@ final class AddonManager
 			try {
 				$this->bootstrapAddon($addonName);
 			} catch (\Throwable $th) {
+				// @TODO Here we can check if we have a Legacy addon and try to load it
 				// throw $th;
 			}
 		}
@@ -46,7 +47,7 @@ final class AddonManager
 		$dependencies = [];
 
 		foreach ($this->addons as $addon) {
-			// Here we can filter or deny dependencies from addons
+			// @TODO Here we can filter or deny dependencies from addons
 			$dependencies = array_merge($dependencies, $addon->getRequiredDependencies());
 		}
 

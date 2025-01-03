@@ -25,7 +25,7 @@ interface AddonBootstrap
 	 * return [LoggerInterface::class];
 	 * ```
 	 */
-	public static function getRequiredDependencies(): array;
+	public function getRequiredDependencies(): array;
 
 	/**
 	 * Return an array of events to subscribe to.
@@ -41,7 +41,7 @@ interface AddonBootstrap
 	 *
 	 * @return array<string, string>
 	 */
-	public static function getSubscribedEvents(): array;
+	public function getSubscribedEvents(): array;
 
 	/**
 	 * Init the addon with the required dependencies.

@@ -25,7 +25,7 @@ final class Addon
 
 	public function getRequiredDependencies(): array
 	{
-		return $this->bootstrap::getRequiredDependencies();
+		return $this->bootstrap->getRequiredDependencies();
 	}
 
 	public function getProvidedDependencyRules(): array

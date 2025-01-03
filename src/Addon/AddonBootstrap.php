@@ -10,20 +10,41 @@ declare(strict_types=1);
 namespace Friendica\Addon;
 
 use Friendica\Addon\Event\AddonStartEvent;
-use Friendica\EventSubscriber\StaticEventSubscriber;
 
 /**
  * Interface an Addon has to implement.
  */
-interface AddonBootstrap extends StaticEventSubscriber
+interface AddonBootstrap
 {
 	/**
-	 * Returns an array with the FQCN of services.
+	 * Returns an array with the FQCN of required services.
+	 *
+	 * Example:
+	 *
+	 * ```php
+	 * return [LoggerInterface::class];
+	 * ```
 	 */
-	public static function getRequiredDependencies(): array;
+	public function getRequiredDependencies(): array;
 
 	/**
-	 * Init of the addon.
+	 * Init the addon with the required dependencies.
 	 */
 	public function initAddon(AddonStartEvent $event): void;
+
+	/**
+	 * Return an array of events to subscribe to.
+	 *
+	 * The keys MUST be the event name.
+	 * The values MUST be the method of the implementing class to call.
+	 *
+	 * Example:
+	 *
+	 * ```php
+	 * return [Event::NAME => 'onEvent'];
+	 * ```
+	 *
+	 * @return array<string, string>
+	 */
+	public function getSubscribedEvents(): array;
 }

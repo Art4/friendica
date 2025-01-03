@@ -21,14 +21,12 @@ use Friendica\Addon\Event\AddonInstallEvent;
 use Friendica\Addon\Event\AddonStartEvent;
 use Friendica\Addon\Event\AddonUninstallEvent;
 use Friendica\Event\HtmlFilterEvent;
-use Friendica\Event\ProvideLoggerEvent;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 class HelloAddon implements AddonBootstrap, DependencyProvider
 {
-	/** @var LoggerInterface */
-	private static $logger;
+	private LoggerInterface $logger;
 
 	/**
 	 * Returns an array of services that are required by this addon.
@@ -37,14 +35,28 @@ class HelloAddon implements AddonBootstrap, DependencyProvider
 	 *
 	 * The dependencies will be passed to the initAddon() method via AddonStartEvent::getDependencies().
 	 */
-	public static function getRequiredDependencies(): array
+	public function getRequiredDependencies(): array
 	{
 		return [
 			LoggerInterface::class,
 		];
 	}
 
-	public static function getStaticSubscribedEvents(): array
+	/**
+	 * Return an array of events to subscribe to.
+	 *
+	 * The keys MUST be the event name.
+	 * The values MUST be the method of the implementing class to call.
+	 *
+	 * Example:
+	 *
+	 * ```php
+	 * return [Event::NAME => 'onEvent'];
+	 * ```
+	 *
+	 * @return array<string, string>
+	 */
+	public function getSubscribedEvents(): array
 	{
 		return [
 			HtmlFilterEvent::PAGE_END => 'onPageEnd',
@@ -81,22 +93,22 @@ class HelloAddon implements AddonBootstrap, DependencyProvider
 		// The values are the instances of the services.
 		$dependencies = $event->getDependencies();
 
-		static::$logger = $dependencies[LoggerInterface::class];
+		$this->logger = $dependencies[LoggerInterface::class];
 
-		static::$logger->info('Hello from HelloAddon');
+		$this->logger->info('Hello from HelloAddon');
 	}
 
-	public static function install(AddonInstallEvent $event): void
+	public function install(AddonInstallEvent $event): void
 	{
 		// do something on install
 	}
 
-	public static function uninstall(AddonUninstallEvent $event): void
+	public function uninstall(AddonUninstallEvent $event): void
 	{
 		// do something on uninstall
 	}
 
-	public static function onPageEnd(HtmlFilterEvent $event): void
+	public function onPageEnd(HtmlFilterEvent $event): void
 	{
 		$event->setHtml($event->getHtml() . '<p>Hello, World!</p>');
 	}

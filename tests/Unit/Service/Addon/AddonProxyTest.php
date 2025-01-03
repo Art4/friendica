@@ -12,16 +12,17 @@ namespace Friendica\Test\Unit\Addon;
 use Friendica\Addon\AddonBootstrap;
 use Friendica\Addon\Event\AddonStartEvent;
 use Friendica\Service\Addon\Addon;
+use Friendica\Service\Addon\AddonProxy;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
-class AddonTest extends TestCase
+class AddonProxyTest extends TestCase
 {
 	public function testCreateWithAddonBootstrap(): void
 	{
 		$bootstrap = $this->createMock(AddonBootstrap::class);
 
-		$addon = new Addon($bootstrap);
+		$addon = new AddonProxy($bootstrap);
 
 		$this->assertInstanceOf(Addon::class, $addon);
 	}
@@ -33,7 +34,7 @@ class AddonTest extends TestCase
 			$this->assertInstanceOf(AddonStartEvent::class, $event);
 		});
 
-		$addon = new Addon($bootstrap);
+		$addon = new AddonProxy($bootstrap);
 
 		$addon->initAddon([]);
 	}
@@ -49,7 +50,7 @@ class AddonTest extends TestCase
 			$this->assertInstanceOf(LoggerInterface::class, $dependencies[LoggerInterface::class]);
 		});
 
-		$addon = new Addon($bootstrap);
+		$addon = new AddonProxy($bootstrap);
 
 		$addon->initAddon(
 			[LoggerInterface::class => $this->createMock(LoggerInterface::class)]

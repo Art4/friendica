@@ -9,39 +9,14 @@ declare(strict_types=1);
 
 namespace Friendica\Service\Addon;
 
-use Friendica\Addon\AddonBootstrap;
-use Friendica\Addon\Event\AddonStartEvent;
-
 /**
- * Proxy object for an addon.
+ * Interface to community with an addon.
  */
-final class Addon
+interface Addon
 {
-	private AddonBootstrap $bootstrap;
+	public function getRequiredDependencies(): array;
 
-	public function __construct(AddonBootstrap $bootstrap)
-	{
-		$this->bootstrap = $bootstrap;
-	}
+	public function getProvidedDependencyRules(): array;
 
-	public function getRequiredDependencies(): array
-	{
-		return $this->bootstrap::getRequiredDependencies();
-	}
-
-	public function getProvidedDependencyRules(): array
-	{
-		if ($this->bootstrap instanceof DependencyProvider) {
-			return $this->bootstrap::provideDependencyRules();
-		}
-
-		return [];
-	}
-
-	public function initAddon(array $dependencies): void
-	{
-		$event = new AddonStartEvent($dependencies);
-
-		$this->bootstrap->initAddon($event);
-	}
+	public function initAddon(array $dependencies): void;
 }

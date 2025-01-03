@@ -21,6 +21,7 @@ final class AddonManager
 
 	private LoggerInterface $logger;
 
+	/** @var Addon[] */
 	private array $addons = [];
 
 	public function __construct(string $addonPath, LoggerInterface $logger)
@@ -81,7 +82,7 @@ final class AddonManager
 			throw new \RuntimeException(sprintf('Bootstrap file for addon "%s" MUST return an instance of AddonBootstrap.', $addonName));
 		}
 
-		$this->addons[$addonName] = new Addon($bootstrap);
+		$this->addons[$addonName] = new AddonProxy($bootstrap);
 
 		$this->logger->info(sprintf('Addon "%s" loaded.', $addonName));
 	}

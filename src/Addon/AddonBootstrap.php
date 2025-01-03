@@ -25,12 +25,7 @@ interface AddonBootstrap
 	 * return [LoggerInterface::class];
 	 * ```
 	 */
-	public function getRequiredDependencies(): array;
-
-	/**
-	 * Init the addon with the required dependencies.
-	 */
-	public function initAddon(AddonStartEvent $event): void;
+	public static function getRequiredDependencies(): array;
 
 	/**
 	 * Return an array of events to subscribe to.
@@ -46,5 +41,10 @@ interface AddonBootstrap
 	 *
 	 * @return array<string, string>
 	 */
-	public function getSubscribedEvents(): array;
+	public static function getSubscribedEvents(): array;
+
+	/**
+	 * Init the addon with the required dependencies.
+	 */
+	public function initAddon(AddonStartEvent $event): void;
 }

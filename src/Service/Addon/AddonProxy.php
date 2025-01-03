@@ -20,6 +20,8 @@ final class AddonProxy implements Addon
 {
 	private AddonBootstrap $bootstrap;
 
+	private bool $isInit = false;
+
 	public function __construct(AddonBootstrap $bootstrap)
 	{
 		$this->bootstrap = $bootstrap;
@@ -41,6 +43,12 @@ final class AddonProxy implements Addon
 
 	public function initAddon(array $dependencies): void
 	{
+		if ($this->isInit) {
+			return;
+		}
+
+		$this->isInit = true;
+
 		$event = new AddonStartEvent($dependencies);
 
 		$this->bootstrap->initAddon($event);

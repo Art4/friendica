@@ -67,6 +67,19 @@ class AddonProxyTest extends TestCase
 		$addon->initAddon([]);
 	}
 
+	public function testInitAddonMultipleTimesWillCallBootstrapOnce(): void
+	{
+		$bootstrap = $this->createMock(AddonBootstrap::class);
+		$bootstrap->expects($this->once())->method('initAddon')->willReturnCallback(function ($event) {
+			$this->assertInstanceOf(AddonStartEvent::class, $event);
+		});
+
+		$addon = new AddonProxy($bootstrap);
+
+		$addon->initAddon([]);
+		$addon->initAddon([]);
+	}
+
 	public function testInitAddonCallsBootstrapWithDependencies(): void
 	{
 		$bootstrap = $this->createMock(AddonBootstrap::class);

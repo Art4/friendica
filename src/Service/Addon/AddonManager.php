@@ -27,7 +27,7 @@ final class AddonManager
 	public function __construct(string $addonPath, LoggerInterface $logger)
 	{
 		$this->addonPath = $addonPath;
-		$this->logger = $logger;
+		$this->logger    = $logger;
 	}
 
 	public function bootstrapAddons(array $addonNames): void
@@ -91,7 +91,7 @@ final class AddonManager
 	public function initAddons(array $dependencies): void
 	{
 		foreach ($this->addons as $addon) {
-			$required = $addon->getRequiredDependencies();
+			$required          = $addon->getRequiredDependencies();
 			$addonDependencies = [];
 
 			foreach ($required as $dependency) {

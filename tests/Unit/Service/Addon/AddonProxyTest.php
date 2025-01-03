@@ -20,7 +20,9 @@ use Psr\Log\LoggerInterface;
 /**
  * Helper interface to combine AddonBootstrap and DependencyProvider.
  */
-interface CombinedAddonBootstrapDependencyProvider extends AddonBootstrap, DependencyProvider {}
+interface CombinedAddonBootstrapDependencyProvider extends AddonBootstrap, DependencyProvider
+{
+}
 
 class AddonProxyTest extends TestCase
 {
@@ -56,7 +58,7 @@ class AddonProxyTest extends TestCase
 	public function testInitAddonCallsBootstrap(): void
 	{
 		$bootstrap = $this->createMock(AddonBootstrap::class);
-		$bootstrap->expects($this->once())->method('initAddon')->willReturnCallback(function($event) {
+		$bootstrap->expects($this->once())->method('initAddon')->willReturnCallback(function ($event) {
 			$this->assertInstanceOf(AddonStartEvent::class, $event);
 		});
 
@@ -69,7 +71,7 @@ class AddonProxyTest extends TestCase
 	{
 		$bootstrap = $this->createMock(AddonBootstrap::class);
 
-		$bootstrap->expects($this->once())->method('initAddon')->willReturnCallback(function(AddonStartEvent $event) {
+		$bootstrap->expects($this->once())->method('initAddon')->willReturnCallback(function (AddonStartEvent $event) {
 			$dependencies = $event->getDependencies();
 
 			$this->assertArrayHasKey(LoggerInterface::class, $dependencies);

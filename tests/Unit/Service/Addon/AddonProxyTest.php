@@ -55,6 +55,22 @@ class AddonProxyTest extends TestCase
 		$addon->getProvidedDependencyRules();
 	}
 
+	public function testGetSubscribedEventsCallsBootstrap(): void
+	{
+		$bootstrap = $this->createMock(AddonBootstrap::class);
+		$bootstrap->expects($this->once())->method('getSubscribedEvents')->willReturn(['foo' => 'bar']);
+
+		$addon = new AddonProxy($bootstrap);
+
+		$this->assertSame(
+			[
+				['foo', [$bootstrap, 'bar']],
+			],
+			$addon->getSubscribedEvents()
+		);
+
+	}
+
 	public function testInitAddonCallsBootstrap(): void
 	{
 		$bootstrap = $this->createMock(AddonBootstrap::class);

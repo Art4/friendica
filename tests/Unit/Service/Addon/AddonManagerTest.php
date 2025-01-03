@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Friendica\Test\Unit\Service\Addon;
 
+use Friendica\Event\HtmlFilterEvent;
 use Friendica\Service\Addon\AddonManager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -26,5 +27,23 @@ class AddonManagerTest extends TestCase
 		);
 
 		$manager->bootstrapAddons(['helloaddon' => []]);
+	}
+
+	public function testGetAllSubscribedEventsReturnsEvents(): void
+	{
+		$logger = $this->createMock(LoggerInterface::class);
+		$logger->expects($this->once())->method('info')->with('Addon "helloaddon" loaded.');
+
+		$manager = new AddonManager(
+			dirname(__DIR__, 3) . '/Util',
+			$logger
+		);
+
+		$manager->bootstrapAddons(['helloaddon' => []]);
+
+		$this->assertSame(
+			[[HtmlFilterEvent::PAGE_END, ['', 'onPageEnd']]],
+			$manager->getAllSubscribedEvents()
+		);
 	}
 }

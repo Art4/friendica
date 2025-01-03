@@ -32,6 +32,17 @@ final class AddonProxy implements Addon
 		return $this->bootstrap->getRequiredDependencies();
 	}
 
+	public function getSubscribedEvents(): array
+	{
+		$events = [];
+
+		foreach ($this->bootstrap->getSubscribedEvents() as $eventName => $methodName) {
+			$events[] = [$eventName, [$this->bootstrap, $methodName]];
+		}
+
+		return $events;
+	}
+
 	public function getProvidedDependencyRules(): array
 	{
 		if ($this->bootstrap instanceof DependencyProvider) {

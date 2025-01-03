@@ -16,6 +16,8 @@ interface Addon
 {
 	public function getRequiredDependencies(): array;
 
+	public function getSubscribedEvents(): array;
+
 	public function getProvidedDependencyRules(): array;
 
 	public function initAddon(array $dependencies): void;

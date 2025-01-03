@@ -65,6 +65,17 @@ final class AddonManager
 		return $dependencyRules;
 	}
 
+	public function getAllSubscribedEvents(): array
+	{
+		$events = [];
+
+		foreach ($this->addons as $addon) {
+			$events = array_merge($events, $addon->getSubscribedEvents());
+		}
+
+		return $events;
+	}
+
 	private function bootstrapAddon(string $addonName): void
 	{
 		$bootstrapFile = sprintf('%s/%s/bootstrap.php', $this->addonPath, $addonName);

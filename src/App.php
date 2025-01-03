@@ -39,6 +39,7 @@ use Friendica\Network\HTTPException;
 use Friendica\Protocol\ATProtocol\DID;
 use Friendica\Security\ExAuth;
 use Friendica\Security\OpenWebAuth;
+use Friendica\Service\Addon\AddonManager;
 use Friendica\Util\BasePath;
 use Friendica\Util\DateTimeFormat;
 use Friendica\Util\HTTPInputData;
@@ -124,6 +125,8 @@ class App
 	 * @var AppHelper $appHelper
 	 */
 	private $appHelper;
+
+	private AddonManager $addonManager;
 
 	private function __construct(Dice $container)
 	{
@@ -270,18 +273,22 @@ class App
 		$processRepository->delete($process);
 	}
 
-	private function setupContainerForAddons(): void
+	private function setupAddonManager(): void
 	{
 		$config = $this->container->create(IManageConfigValues::class);
 
-		/** @var \Friendica\Service\Addon\AddonManager $addonManager */
-		$addonManager = $this->container->create(\Friendica\Service\Addon\AddonManager::class);
+		$this->addonManager = $this->container->create(\Friendica\Service\Addon\AddonManager::class);
 
-		$addonManager->bootstrapAddons($config->get('addons') ?? []);
+		$this->addonManager->bootstrapAddons($config->get('addons') ?? []);
+	}
+
+	private function setupContainerForAddons(): void
+	{
+		$this->setupAddonManager();
 
 		// At this place we should be careful because addons can change the container
 		// Maybe we should create a new container especially for the addons
-		$this->container = $this->container->addRules($addonManager->getProvidedDependencyRules());
+		$this->container = $this->container->addRules($this->addonManager->getProvidedDependencyRules());
 
 		/** @var \Friendica\Core\Addon\Capability\ICanLoadAddons $addonLoader */
 		$addonLoader = $this->container->create(\Friendica\Core\Addon\Capability\ICanLoadAddons::class);
@@ -290,11 +297,11 @@ class App
 
 		$dependencies = [];
 
-		foreach ($addonManager->getAllRequiredDependencies() as $dependency) {
+		foreach ($this->addonManager->getAllRequiredDependencies() as $dependency) {
 			$dependencies[$dependency] = $this->container->create($dependency);
 		}
 
-		$addonManager->initAddons($dependencies);
+		$this->addonManager->initAddons($dependencies);
 	}
 
 	private function setupContainerForLogger(string $logChannel): void
@@ -311,6 +318,10 @@ class App
 
 		foreach (HookEventBridge::getStaticSubscribedEvents() as $eventName => $methodName) {
 			$eventDispatcher->addListener($eventName, [HookEventBridge::class, $methodName]);
+		}
+
+		foreach ($this->addonManager->getAllSubscribedEvents() as $listener) {
+			$eventDispatcher->addListener($listener[0], $listener[1]);
 		}
 	}
 

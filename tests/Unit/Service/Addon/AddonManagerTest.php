@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace Friendica\Test\Unit\Service\Addon;
 
 use Friendica\Event\HtmlFilterEvent;
+use Friendica\Service\Addon\Addon;
+use Friendica\Service\Addon\AddonLoader;
 use Friendica\Service\Addon\AddonManager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -18,31 +20,28 @@ class AddonManagerTest extends TestCase
 {
 	public function testBootstrapAddonsLoadsTheAddon(): void
 	{
-		$logger = $this->createMock(LoggerInterface::class);
-		$logger->expects($this->once())->method('info')->with('Addon "helloaddon" loaded.');
+		$loader = $this->createMock(AddonLoader::class);
+		$loader->expects($this->once())->method('getAddons')->willReturn(['helloaddon' => $this->createMock(Addon::class)]);
 
-		$manager = new AddonManager(
-			dirname(__DIR__, 3) . '/Util',
-			$logger
-		);
+		$manager = new AddonManager($loader);
 
 		$manager->bootstrapAddons(['helloaddon' => []]);
 	}
 
 	public function testGetAllSubscribedEventsReturnsEvents(): void
 	{
-		$logger = $this->createMock(LoggerInterface::class);
-		$logger->expects($this->once())->method('info')->with('Addon "helloaddon" loaded.');
+		$addon = $this->createMock(Addon::class);
+		$addon->expects($this->once())->method('getSubscribedEvents')->willReturn([[HtmlFilterEvent::PAGE_END, [Addon::class, 'onPageEnd']]]);
 
-		$manager = new AddonManager(
-			dirname(__DIR__, 3) . '/Util',
-			$logger
-		);
+		$loader = $this->createMock(AddonLoader::class);
+		$loader->expects($this->once())->method('getAddons')->willReturn(['helloaddon' => $addon]);
+
+		$manager = new AddonManager($loader);
 
 		$manager->bootstrapAddons(['helloaddon' => []]);
 
 		$this->assertSame(
-			[[HtmlFilterEvent::PAGE_END, ['', 'onPageEnd']]],
+			[[HtmlFilterEvent::PAGE_END, [Addon::class, 'onPageEnd']]],
 			$manager->getAllSubscribedEvents()
 		);
 	}

@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Factory for all addons.
  */
-final class AddonFactory
+final class AddonFactory implements AddonLoader
 {
 	private string $addonPath;
 
@@ -30,6 +30,9 @@ final class AddonFactory
 		$this->logger    = $logger;
 	}
 
+	/**
+	 * @return Addon[] Returns an array of Addon instances.
+	 */
 	public function getAddons(array $addonNames): array
 	{
 		foreach ($addonNames as $addonName => $addonDetails) {

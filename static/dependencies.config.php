@@ -165,7 +165,8 @@ return (function(string $basepath, array $getVars, array $serverVars, array $coo
 		\Psr\EventDispatcher\EventDispatcherInterface::class => [
 			'instanceOf' => \Friendica\Event\EventDispatcher::class,
 		],
-		\Friendica\Service\Addon\AddonManager::class => [
+		\Friendica\Service\Addon\AddonLoader::class => [
+			'instanceOf' => \Friendica\Service\Addon\AddonFactory::class,
 			'constructParams' => [
 				$basepath . '/addon',
 			],

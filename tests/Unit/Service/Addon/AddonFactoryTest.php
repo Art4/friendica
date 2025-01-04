@@ -11,11 +11,22 @@ namespace Friendica\Test\Unit\Service\Addon;
 
 use Friendica\Service\Addon\Addon;
 use Friendica\Service\Addon\AddonFactory;
+use Friendica\Service\Addon\AddonLoader;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 class AddonFactoryTest extends TestCase
 {
+	public function testAddonFactoryImplementsAddonLoaderInterface(): void
+	{
+		$factory = new AddonFactory(
+			dirname(__DIR__, 3) . '/Util',
+			$this->createMock(LoggerInterface::class)
+		);
+
+		$this->assertInstanceOf(AddonLoader::class, $factory);
+	}
+
 	public function testLoadAddonsLoadsTheAddon(): void
 	{
 		$logger = $this->createMock(LoggerInterface::class);

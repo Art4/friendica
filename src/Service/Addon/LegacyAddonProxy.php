@@ -51,4 +51,18 @@ final class LegacyAddonProxy implements Addon
 
 		include_once($this->path . '/' . $this->name . '/' . $this->name . '.php');
 	}
+
+	public function installAddon(): void
+	{
+		if (function_exists($this->name . '_install')) {
+			call_user_func($this->name . '_install');
+		}
+	}
+
+	public function uninstallAddon(): void
+	{
+		if (function_exists($this->name . '_uninstall')) {
+			call_user_func($this->name . '_uninstall');
+		}
+	}
 }

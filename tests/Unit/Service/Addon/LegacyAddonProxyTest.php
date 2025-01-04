@@ -13,7 +13,6 @@ use Friendica\Service\Addon\Addon;
 use Friendica\Service\Addon\LegacyAddonProxy;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 
 class LegacyAddonProxyTest extends TestCase
 {
@@ -65,7 +64,7 @@ class LegacyAddonProxyTest extends TestCase
 
 	public function testInitAddonIncludesAddonFile(): void
 	{
-		$root = vfsStream::setup('addons', 0777, ['helloaddon' => []]);
+		$root = vfsStream::setup('addons_1', 0777, ['helloaddon' => []]);
 
 		vfsStream::newFile('helloaddon.php')
 				->at($root->getChild('helloaddon'))
@@ -85,7 +84,7 @@ class LegacyAddonProxyTest extends TestCase
 
 	public function testInitAddonMultipleTimesWillIncludeFileOnlyOnce(): void
 	{
-		$root = vfsStream::setup('addons', 0777, ['helloaddon' => []]);
+		$root = vfsStream::setup('addons_2', 0777, ['helloaddon' => []]);
 
 		vfsStream::newFile('helloaddon.php')
 				->at($root->getChild('helloaddon'))
@@ -95,7 +94,7 @@ class LegacyAddonProxyTest extends TestCase
 
 		try {
 			$addon->initAddon([]);
-		} catch (\Throwable $th) {
+		} catch (\Exception $th) {
 			$this->assertSame(
 				'Addon loaded',
 				$th->getMessage()
@@ -104,5 +103,47 @@ class LegacyAddonProxyTest extends TestCase
 
 		$addon->initAddon([]);
 		$addon->initAddon([]);
+	}
+
+	public function testInstallAddonWillCallInstallFunction(): void
+	{
+		$root = vfsStream::setup('addons_3', 0777, ['helloaddon' => []]);
+
+		vfsStream::newFile('helloaddon.php')
+				->at($root->getChild('helloaddon'))
+				->setContent('<?php function helloaddon_install() { throw new \Exception("Addon installed"); }');
+
+		$addon = new LegacyAddonProxy('helloaddon', $root->url());
+
+		$addon->initAddon([]);
+		try {
+			$addon->installAddon();
+		} catch (\Exception $th) {
+			$this->assertSame(
+				'Addon installed',
+				$th->getMessage()
+			);
+		}
+	}
+
+	public function testUninstallAddonWillCallUninstallFunction(): void
+	{
+		$root = vfsStream::setup('addons_4', 0777, ['helloaddon' => []]);
+
+		vfsStream::newFile('helloaddon.php')
+				->at($root->getChild('helloaddon'))
+				->setContent('<?php function helloaddon_uninstall() { throw new \Exception("Addon uninstalled"); }');
+
+		$addon = new LegacyAddonProxy('helloaddon', $root->url());
+
+		$addon->initAddon([]);
+		try {
+			$addon->uninstallAddon();
+		} catch (\Exception $th) {
+			$this->assertSame(
+				'Addon uninstalled',
+				$th->getMessage()
+			);
+		}
 	}
 }

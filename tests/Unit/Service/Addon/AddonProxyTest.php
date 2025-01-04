@@ -12,6 +12,7 @@ namespace Friendica\Test\Unit\Addon;
 use Friendica\Addon\AddonBootstrap;
 use Friendica\Addon\DependencyProvider;
 use Friendica\Addon\Event\AddonStartEvent;
+use Friendica\Addon\InstallableAddon;
 use Friendica\Service\Addon\Addon;
 use Friendica\Service\Addon\AddonProxy;
 use PHPUnit\Framework\TestCase;
@@ -21,6 +22,13 @@ use Psr\Log\LoggerInterface;
  * Helper interface to combine AddonBootstrap and DependencyProvider.
  */
 interface CombinedAddonBootstrapDependencyProvider extends AddonBootstrap, DependencyProvider
+{
+}
+
+/**
+ * Helper interface to combine AddonBootstrap and InstallableAddon.
+ */
+interface CombinedAddonBootstrapInstallableAddon extends AddonBootstrap, InstallableAddon
 {
 }
 
@@ -112,5 +120,27 @@ class AddonProxyTest extends TestCase
 		$addon->initAddon(
 			[LoggerInterface::class => $this->createMock(LoggerInterface::class)]
 		);
+	}
+
+	public function testInstallAddonCallsBootstrap(): void
+	{
+		$bootstrap = $this->createMock(CombinedAddonBootstrapInstallableAddon::class);
+		$bootstrap->expects($this->once())->method('install');
+
+		$addon = new AddonProxy($bootstrap);
+
+		$addon->initAddon([]);
+		$addon->installAddon();
+	}
+
+	public function testUninstallAddonCallsBootstrap(): void
+	{
+		$bootstrap = $this->createMock(CombinedAddonBootstrapInstallableAddon::class);
+		$bootstrap->expects($this->once())->method('uninstall');
+
+		$addon = new AddonProxy($bootstrap);
+
+		$addon->initAddon([]);
+		$addon->uninstallAddon();
 	}
 }

@@ -17,14 +17,13 @@ namespace FriendicaAddons\HelloAddon;
 
 use Friendica\Addon\AddonBootstrap;
 use Friendica\Addon\DependencyProvider;
-use Friendica\Addon\Event\AddonInstallEvent;
 use Friendica\Addon\Event\AddonStartEvent;
-use Friendica\Addon\Event\AddonUninstallEvent;
+use Friendica\Addon\InstallableAddon;
 use Friendica\Event\HtmlFilterEvent;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-class HelloAddon implements AddonBootstrap, DependencyProvider
+class HelloAddon implements AddonBootstrap, DependencyProvider, InstallableAddon
 {
 	private LoggerInterface $logger;
 
@@ -68,7 +67,7 @@ class HelloAddon implements AddonBootstrap, DependencyProvider
 	 */
 	public function provideDependencyRules(): array
 	{
-		// or return require($path_to_dependencies_file);
+		// replaces require($path_to_dependencies_file);
 		return [
 			LoggerInterface::class => [
 				'instanceOf' => NullLogger::class,
@@ -82,7 +81,7 @@ class HelloAddon implements AddonBootstrap, DependencyProvider
 	 */
 	public function provideStrategyRules(): array
 	{
-		// or return require($path_to_strategies_file);
+		// replaces require($path_to_strategies_file);
 		return [];
 	}
 
@@ -98,14 +97,20 @@ class HelloAddon implements AddonBootstrap, DependencyProvider
 		$this->logger->info('Hello from HelloAddon');
 	}
 
-	public function install(AddonInstallEvent $event): void
+	/**
+	 * Runs after AddonBootstrap::initAddon()
+	 */
+	public function install(): void
 	{
-		// do something on install
+		$this->logger->info('HelloAddon installed');
 	}
 
-	public function uninstall(AddonUninstallEvent $event): void
+	/**
+	 * Runs after AddonBootstrap::initAddon()
+	 */
+	public function uninstall(): void
 	{
-		// do something on uninstall
+		$this->logger->info('HelloAddon uninstalled');
 	}
 
 	public function onPageEnd(HtmlFilterEvent $event): void

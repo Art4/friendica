@@ -21,4 +21,8 @@ interface Addon
 	public function getProvidedDependencyRules(): array;
 
 	public function initAddon(array $dependencies): void;
+
+	public function installAddon(): void;
+
+	public function uninstallAddon(): void;
 }

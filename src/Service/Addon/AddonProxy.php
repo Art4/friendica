@@ -12,6 +12,7 @@ namespace Friendica\Service\Addon;
 use Friendica\Addon\AddonBootstrap;
 use Friendica\Addon\DependencyProvider;
 use Friendica\Addon\Event\AddonStartEvent;
+use Friendica\Addon\InstallableAddon;
 
 /**
  * Proxy object for an addon.
@@ -63,5 +64,19 @@ final class AddonProxy implements Addon
 		$event = new AddonStartEvent($dependencies);
 
 		$this->bootstrap->initAddon($event);
+	}
+
+	public function installAddon(): void
+	{
+		if ($this->bootstrap instanceof InstallableAddon) {
+			$this->bootstrap->install();
+		}
+	}
+
+	public function uninstallAddon(): void
+	{
+		if ($this->bootstrap instanceof InstallableAddon) {
+			$this->bootstrap->uninstall();
+		}
 	}
 }

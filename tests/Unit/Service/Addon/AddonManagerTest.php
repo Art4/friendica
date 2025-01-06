@@ -14,7 +14,6 @@ use Friendica\Service\Addon\Addon;
 use Friendica\Service\Addon\AddonLoader;
 use Friendica\Service\Addon\AddonManager;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 
 class AddonManagerTest extends TestCase
 {

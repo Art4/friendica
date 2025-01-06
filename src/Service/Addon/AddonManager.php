@@ -9,9 +9,6 @@ declare(strict_types=1);
 
 namespace Friendica\Service\Addon;
 
-use Friendica\Addon\AddonBootstrap;
-use Psr\Log\LoggerInterface;
-
 /**
  * Manager for all addons.
  */

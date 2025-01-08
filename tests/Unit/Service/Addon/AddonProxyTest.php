@@ -17,7 +17,6 @@ use Friendica\Service\Addon\Addon;
 use Friendica\Service\Addon\AddonProxy;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * Helper interface to combine AddonBootstrap and DependencyProvider.

@@ -37,7 +37,7 @@ final class AddonManager
 
 		foreach ($this->addons as $addon) {
 			// @TODO Here we can filter or deny dependencies from addons
-			$dependencies[$addon->getId()] =  $addon->getRequiredDependencies();
+			$dependencies[$addon->getId()] = $addon->getRequiredDependencies();
 		}
 
 		return $dependencies;

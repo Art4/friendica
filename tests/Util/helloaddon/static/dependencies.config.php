@@ -21,7 +21,7 @@
 
 return [
 	\Psr\Log\LoggerInterface::class => [
-        'instanceOf' => \Friendica\Core\Logger\Factory\Logger::class,
+        'instanceOf' => \Psr\Log\NullLogger::class,
         'call' => null,
     ],
 ];

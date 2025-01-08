@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Friendica\Service\Addon;
 
 /**
- * Interface to community with an addon.
+ * Interface to communicate with an addon.
  */
 interface Addon
 {

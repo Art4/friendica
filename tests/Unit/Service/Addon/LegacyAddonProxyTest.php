@@ -37,14 +37,18 @@ class LegacyAddonProxyTest extends TestCase
 		);
 	}
 
-	public function testGetProvidedDependencyRulesReturnsEmptyArray(): void
+	public function testGetProvidedDependencyIncludesConfigFile(): void
 	{
-		$root = vfsStream::setup('addons', 0777, ['helloaddon' => []]);
+		$root = vfsStream::setup('addons_4', 0777, ['helloaddon' => ['static' => []]]);
+
+		vfsStream::newFile('dependencies.config.php')
+				->at($root->getChild('helloaddon/static'))
+				->setContent('<?php return [\'name\' => []];');
 
 		$addon = new LegacyAddonProxy('helloaddon', $root->url());
 
 		$this->assertSame(
-			[],
+			['name' => []],
 			$addon->getProvidedDependencyRules()
 		);
 	}
@@ -59,7 +63,6 @@ class LegacyAddonProxyTest extends TestCase
 			[],
 			$addon->getSubscribedEvents()
 		);
-
 	}
 
 	public function testInitAddonIncludesAddonFile(): void

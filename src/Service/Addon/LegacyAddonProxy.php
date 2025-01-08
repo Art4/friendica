@@ -38,6 +38,12 @@ final class LegacyAddonProxy implements Addon
 
 	public function getProvidedDependencyRules(): array
 	{
+		$fileName = $this->path . '/' . $this->name . '/static/dependencies.config.php';
+
+		if (is_file($fileName)) {
+			return include_once($fileName);
+		}
+
 		return [];
 	}
 

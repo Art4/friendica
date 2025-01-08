@@ -46,6 +46,7 @@ final class AddonManager
 		$dependencyRules = [];
 
 		foreach ($this->addons as $addon) {
+			// @TODO At this point we can handle duplicate rules and handle possible conflicts
 			$dependencyRules = array_merge($dependencyRules, $addon->getProvidedDependencyRules());
 		}
 

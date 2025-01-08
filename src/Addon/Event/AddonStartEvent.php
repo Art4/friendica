@@ -9,20 +9,22 @@ declare(strict_types=1);
 
 namespace Friendica\Addon\Event;
 
+use Psr\Container\ContainerInterface;
+
 /**
  * Start an addon.
  */
 final class AddonStartEvent
 {
-	private array $dependencies;
+	private ContainerInterface $container;
 
-	public function __construct(array $dependencies)
+	public function __construct(ContainerInterface $container)
 	{
-		$this->dependencies = $dependencies;
+		$this->container = $container;
 	}
 
-	public function getDependencies(): array
+	public function getContainer(): ContainerInterface
 	{
-		return $this->dependencies;
+		return $this->container;
 	}
 }

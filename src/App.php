@@ -38,6 +38,7 @@ use Friendica\Protocol\ATProtocol\DID;
 use Friendica\Security\Authentication;
 use Friendica\Security\ExAuth;
 use Friendica\Security\OpenWebAuth;
+use Friendica\Service\Addon\AddonContainer;
 use Friendica\Service\Addon\AddonManager;
 use Friendica\Util\BasePath;
 use Friendica\Util\DateTimeFormat;
@@ -208,17 +209,18 @@ class App
 
 		// At this place we should be careful because addons can change the container
 		// Maybe we should create a new container especially for the addons
-		foreach ($$this->addonManager->getProvidedDependencyRules() as $name => $rule) {
+		foreach ($this->addonManager->getProvidedDependencyRules() as $name => $rule) {
 			$this->container->addRule($name, $rule);
 		}
 
-		$dependencies = [];
+		$containers = [];
 
-		foreach ($this->addonManager->getAllRequiredDependencies() as $dependency) {
-			$dependencies[$dependency] = $this->container->create($dependency);
+		foreach ($this->addonManager->getRequiredDependencies() as $addonId => $dependencies) {
+			// @TODO At this point we can filter or restrict the dependencies of addons
+			$containers[$addonId] = AddonContainer::fromContainer($this->container, $dependencies);
 		}
 
-		$this->addonManager->initAddons($dependencies);
+		$this->addonManager->initAddons($containers);
 	}
 
 	private function registerEventDispatcher(): void

@@ -13,6 +13,7 @@ use Friendica\Service\Addon\Addon;
 use Friendica\Service\Addon\LegacyAddonProxy;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 
 class LegacyAddonProxyTest extends TestCase
 {
@@ -85,7 +86,7 @@ class LegacyAddonProxyTest extends TestCase
 		$addon = new LegacyAddonProxy('helloaddon', $root->url());
 
 		try {
-			$addon->initAddon([]);
+			$addon->initAddon($this->createStub(ContainerInterface::class));
 		} catch (\Throwable $th) {
 			$this->assertSame(
 				'Addon loaded',
@@ -105,7 +106,7 @@ class LegacyAddonProxyTest extends TestCase
 		$addon = new LegacyAddonProxy('helloaddon', $root->url());
 
 		try {
-			$addon->initAddon([]);
+			$addon->initAddon($this->createStub(ContainerInterface::class));
 		} catch (\Exception $th) {
 			$this->assertSame(
 				'Addon loaded',
@@ -113,8 +114,8 @@ class LegacyAddonProxyTest extends TestCase
 			);
 		}
 
-		$addon->initAddon([]);
-		$addon->initAddon([]);
+		$addon->initAddon($this->createStub(ContainerInterface::class));
+		$addon->initAddon($this->createStub(ContainerInterface::class));
 	}
 
 	public function testInstallAddonWillCallInstallFunction(): void
@@ -127,7 +128,7 @@ class LegacyAddonProxyTest extends TestCase
 
 		$addon = new LegacyAddonProxy('helloaddon', $root->url());
 
-		$addon->initAddon([]);
+		$addon->initAddon($this->createStub(ContainerInterface::class));
 		try {
 			$addon->installAddon();
 		} catch (\Exception $th) {
@@ -148,7 +149,7 @@ class LegacyAddonProxyTest extends TestCase
 
 		$addon = new LegacyAddonProxy('helloaddon', $root->url());
 
-		$addon->initAddon([]);
+		$addon->initAddon($this->createStub(ContainerInterface::class));
 		try {
 			$addon->uninstallAddon();
 		} catch (\Exception $th) {

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Friendica\Service\Addon;
 
+use Psr\Container\ContainerInterface;
+
 /**
  * Proxy object for a legacy addon.
  */
@@ -52,7 +54,7 @@ final class LegacyAddonProxy implements Addon
 		return [];
 	}
 
-	public function initAddon(array $dependencies): void
+	public function initAddon(ContainerInterface $container): void
 	{
 		if ($this->isInit) {
 			return;

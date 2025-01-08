@@ -32,7 +32,7 @@ class HelloAddon implements AddonBootstrap, DependencyProvider, InstallableAddon
 	 *
 	 * The array should contain FQCN of the required services.
 	 *
-	 * The dependencies will be passed to the initAddon() method via AddonStartEvent::getDependencies().
+	 * The dependencies will be passed as a PSR-11 Container to the initAddon() method via AddonStartEvent::getContainer().
 	 */
 	public function getRequiredDependencies(): array
 	{
@@ -87,12 +87,9 @@ class HelloAddon implements AddonBootstrap, DependencyProvider, InstallableAddon
 
 	public function initAddon(AddonStartEvent $event): void
 	{
-		// $dependencies containts an array of services defined in getRequiredDependencies().
-		// The keys are the FQCN of the services.
-		// The values are the instances of the services.
-		$dependencies = $event->getDependencies();
+		$container = $event->getContainer();
 
-		$this->logger = $dependencies[LoggerInterface::class];
+		$this->logger = $container->get(LoggerInterface::class);
 
 		$this->logger->info('Hello from HelloAddon');
 	}

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Friendica\Service\Addon;
 
+use Psr\Container\ContainerInterface;
+
 /**
  * Interface to communicate with an addon.
  */
@@ -22,7 +24,7 @@ interface Addon
 
 	public function getProvidedDependencyRules(): array;
 
-	public function initAddon(array $dependencies): void;
+	public function initAddon(ContainerInterface $container): void;
 
 	public function installAddon(): void;
 

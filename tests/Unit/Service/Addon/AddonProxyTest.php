@@ -16,6 +16,7 @@ use Friendica\Addon\InstallableAddon;
 use Friendica\Service\Addon\Addon;
 use Friendica\Service\Addon\AddonProxy;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -97,7 +98,7 @@ class AddonProxyTest extends TestCase
 
 		$addon = new AddonProxy('id', $bootstrap);
 
-		$addon->initAddon([]);
+		$addon->initAddon($this->createStub(ContainerInterface::class));
 	}
 
 	public function testInitAddonMultipleTimesWillCallBootstrapOnce(): void
@@ -109,26 +110,22 @@ class AddonProxyTest extends TestCase
 
 		$addon = new AddonProxy('id', $bootstrap);
 
-		$addon->initAddon([]);
-		$addon->initAddon([]);
+		$addon->initAddon($this->createStub(ContainerInterface::class));
+		$addon->initAddon($this->createStub(ContainerInterface::class));
 	}
 
 	public function testInitAddonCallsBootstrapWithDependencies(): void
 	{
+		$container = $this->createStub(ContainerInterface::class);
+
 		$bootstrap = $this->createMock(AddonBootstrap::class);
-
-		$bootstrap->expects($this->once())->method('initAddon')->willReturnCallback(function (AddonStartEvent $event) {
-			$dependencies = $event->getDependencies();
-
-			$this->assertArrayHasKey(LoggerInterface::class, $dependencies);
-			$this->assertInstanceOf(LoggerInterface::class, $dependencies[LoggerInterface::class]);
+		$bootstrap->expects($this->once())->method('initAddon')->willReturnCallback(function (AddonStartEvent $event) use ($container) {
+			$this->assertSame($container, $event->getContainer());
 		});
 
 		$addon = new AddonProxy('id', $bootstrap);
 
-		$addon->initAddon(
-			[LoggerInterface::class => $this->createStub(LoggerInterface::class)]
-		);
+		$addon->initAddon($container);
 	}
 
 	public function testInstallAddonCallsBootstrap(): void
@@ -138,7 +135,7 @@ class AddonProxyTest extends TestCase
 
 		$addon = new AddonProxy('id', $bootstrap);
 
-		$addon->initAddon([]);
+		$addon->initAddon($this->createStub(ContainerInterface::class));
 		$addon->installAddon();
 	}
 
@@ -149,7 +146,7 @@ class AddonProxyTest extends TestCase
 
 		$addon = new AddonProxy('id', $bootstrap);
 
-		$addon->initAddon([]);
+		$addon->initAddon($this->createStub(ContainerInterface::class));
 		$addon->uninstallAddon();
 	}
 }

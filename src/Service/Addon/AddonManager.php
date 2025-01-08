@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Friendica\Service\Addon;
 
+use Psr\Container\ContainerInterface;
+
 /**
  * Manager for all addons.
  */
@@ -27,18 +29,6 @@ final class AddonManager
 	public function bootstrapAddons(array $addonNames): void
 	{
 		$this->addons = $this->addonFactory->getAddons($addonNames);
-	}
-
-	public function getAllRequiredDependencies(): array
-	{
-		$dependencies = [];
-
-		foreach ($this->addons as $addon) {
-			// @TODO Here we can filter or deny dependencies from addons
-			$dependencies = array_merge($dependencies, $addon->getRequiredDependencies());
-		}
-
-		return array_unique($dependencies);
 	}
 
 	public function getRequiredDependencies(): array
@@ -76,21 +66,19 @@ final class AddonManager
 		return $events;
 	}
 
-	public function initAddons(array $dependencies): void
+	/**
+	 * @param ContainerInterface[] $containers
+	 */
+	public function initAddons(array $containers): void
 	{
 		foreach ($this->addons as $addon) {
-			$required          = $addon->getRequiredDependencies();
-			$addonDependencies = [];
+			$container = $containers[$addon->getId()] ?? null;
 
-			foreach ($required as $dependency) {
-				if (!array_key_exists($dependency, $dependencies)) {
-					throw new \RuntimeException(sprintf('Dependency "%s" required by addon "%s" not found.', $dependency, $addon));
-				}
-
-				$addonDependencies[$dependency] = $dependencies[$dependency];
+			if ($container === null) {
+				throw new \RuntimeException(sprintf('Container for addon "%s" is missing.', $addon->getId()));
 			}
 
-			$addon->initAddon($addonDependencies);
+			$addon->initAddon($container);
 		}
 	}
 }

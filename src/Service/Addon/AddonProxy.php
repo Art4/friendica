@@ -13,6 +13,7 @@ use Friendica\Addon\AddonBootstrap;
 use Friendica\Addon\DependencyProvider;
 use Friendica\Addon\Event\AddonStartEvent;
 use Friendica\Addon\InstallableAddon;
+use Psr\Container\ContainerInterface;
 
 /**
  * Proxy object for an addon.
@@ -61,7 +62,7 @@ final class AddonProxy implements Addon
 		return [];
 	}
 
-	public function initAddon(array $dependencies): void
+	public function initAddon(ContainerInterface $container): void
 	{
 		if ($this->isInit) {
 			return;
@@ -69,7 +70,7 @@ final class AddonProxy implements Addon
 
 		$this->isInit = true;
 
-		$event = new AddonStartEvent($dependencies);
+		$event = new AddonStartEvent($container);
 
 		$this->bootstrap->initAddon($event);
 	}

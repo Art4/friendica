@@ -21,7 +21,7 @@ class AddonFactoryTest extends TestCase
 	{
 		$factory = new AddonFactory(
 			dirname(__DIR__, 3) . '/Util',
-			$this->createMock(LoggerInterface::class)
+			$this->createStub(LoggerInterface::class)
 		);
 
 		$this->assertInstanceOf(AddonLoader::class, $factory);

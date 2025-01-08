@@ -36,7 +36,7 @@ class AddonProxyTest extends TestCase
 {
 	public function testCreateWithAddonBootstrap(): void
 	{
-		$bootstrap = $this->createMock(AddonBootstrap::class);
+		$bootstrap = $this->createStub(AddonBootstrap::class);
 
 		$addon = new AddonProxy($bootstrap);
 
@@ -118,7 +118,7 @@ class AddonProxyTest extends TestCase
 		$addon = new AddonProxy($bootstrap);
 
 		$addon->initAddon(
-			[LoggerInterface::class => $this->createMock(LoggerInterface::class)]
+			[LoggerInterface::class => $this->createStub(LoggerInterface::class)]
 		);
 	}
 

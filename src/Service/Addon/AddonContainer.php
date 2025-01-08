@@ -54,7 +54,7 @@ final class AddonContainer implements ContainerInterface
 			$id,
 		);
 
-		throw new class ($message) extends \Exception implements NotFoundExceptionInterface {};
+		throw new class ($message) extends \RuntimeException implements NotFoundExceptionInterface {};
 	}
 
 	/**

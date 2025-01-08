@@ -10,13 +10,10 @@ declare(strict_types=1);
 namespace Friendica\Test\Unit\Service\Addon;
 
 use Friendica\Core\Container;
-use Friendica\Service\Addon\Addon;
 use Friendica\Service\Addon\AddonContainer;
-use Friendica\Service\Addon\AddonLoader;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Psr\Log\LoggerInterface;
 
 class AddonContainerTest extends TestCase
 {
@@ -73,7 +70,7 @@ class AddonContainerTest extends TestCase
 		);
 
 		$this->expectException(NotFoundExceptionInterface::class);
-		$this->expectExceptionMessage('foo');
+		$this->expectExceptionMessage('No entry was found for "foo"');
 
 		$container->get('foo');
 	}

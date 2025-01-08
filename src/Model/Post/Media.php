@@ -90,8 +90,9 @@ class Media
 		}
 
 		$media['url'] = Network::sanitizeUrl($media['url']);
-		$media        = self::unsetEmptyFields($media);
-		$media        = DI::dbaDefinition()->truncateFieldsForTable('post-media', $media);
+
+		$media = self::unsetEmptyFields($media);
+		$media = DI::dbaDefinition()->truncateFieldsForTable('post-media', $media);
 
 		// We are storing as fast as possible to avoid duplicated network requests
 		// when fetching additional information for pictures and other content.
@@ -157,8 +158,11 @@ class Media
 	public static function getAttachElement(string $href, int $length, string $type, string $title = ''): string
 	{
 		$media = self::fetchAdditionalData([
-			'type' => self::DOCUMENT, 'url' => $href,
-			'size' => $length, 'mimetype' => $type, 'description' => $title
+			'type'        => self::DOCUMENT,
+			'url'         => $href,
+			'size'        => $length,
+			'mimetype'    => $type,
+			'description' => $title
 		]);
 
 		return '[attach]href="' . $media['url'] . '" length="' . $media['size'] .
@@ -184,7 +188,7 @@ class Media
 		}
 
 		// Fetch the mimetype or size if missing.
-		if (Network::isValidHttpUrl($media['url']) && empty($media['mimetype']) && !in_array($media['type'], [self::IMAGE, self::HLS])) {
+		if (Network::isValidHttpUrl($media['url']) && (empty($media['mimetype']) || $media['type'] == self::HTML) && !in_array($media['type'], [self::IMAGE, self::HLS])) {
 			$timeout = DI::config()->get('system', 'xrd_timeout');
 			try {
 				$curlResult = DI::httpClient()->head($media['url'], [HttpClientOptions::ACCEPT_CONTENT => HttpClientAccept::AS_DEFAULT, HttpClientOptions::TIMEOUT => $timeout, HttpClientOptions::REQUEST => HttpClientRequest::CONTENTTYPE]);
@@ -194,8 +198,8 @@ class Media
 					$curlResult = DI::httpClient()->get($media['url'], HttpClientAccept::AS_DEFAULT, [HttpClientOptions::TIMEOUT => $timeout]);
 				}
 				if ($curlResult->isSuccess()) {
-					if (empty($media['mimetype'])) {
-						$media['mimetype'] = $curlResult->getContentType() ?? '';
+					if (!empty($curlResult->getContentType())) {
+						$media['mimetype'] = $curlResult->getContentType();
 					}
 					if (empty($media['size'])) {
 						$media['size'] = (int)($curlResult->getHeader('Content-Length')[0] ?? strlen($curlResult->getBodyString() ?? ''));
@@ -348,8 +352,8 @@ class Media
 		$media['name']            = $item['title'];
 		$media['author-url']      = $item['author-link'];
 		$media['author-name']     = $item['author-name'];
-		$media['author-image']    = $contact['avatar']      ?? $item['author-avatar'];
-		$media['publisher-url']   = $gserver['url']        ?? null;
+		$media['author-image']    = $contact['avatar']    ?? $item['author-avatar'];
+		$media['publisher-url']   = $gserver['url']       ?? null;
 		$media['publisher-name']  = $gserver['site_name'] ?? null;
 		$media['publisher-image'] = null;
 
@@ -391,7 +395,7 @@ class Media
 		$media['author-url']      = $contact['url'];
 		$media['author-name']     = $contact['name'];
 		$media['author-image']    = $contact['avatar'];
-		$media['publisher-url']   = $gserver['url']        ?? null;
+		$media['publisher-url']   = $gserver['url']       ?? null;
 		$media['publisher-name']  = $gserver['site_name'] ?? null;
 		$media['publisher-image'] = null;
 
@@ -414,22 +418,22 @@ class Media
 				Logger::debug('Detected site data is empty, use suggested media data instead', ['uri-id' => $media['uri-id'], 'url' => $media['url'], 'type' => $data['type']]);
 			}
 		} else {
-			$media['preview']        = $data['images'][0]['src']           ?? null;
-			$media['preview-height'] = $data['images'][0]['height'] ?? null;
-			$media['preview-width']  = $data['images'][0]['width']   ?? null;
-			$media['blurhash']       = $data['images'][0]['blurhash']     ?? null;
-			$media['description']    = $data['text']                   ?? null;
-			$media['name']           = $data['title']                         ?? null;
+			$media['preview']        = $data['images'][0]['src']      ?? null;
+			$media['preview-height'] = $data['images'][0]['height']   ?? null;
+			$media['preview-width']  = $data['images'][0]['width']    ?? null;
+			$media['blurhash']       = $data['images'][0]['blurhash'] ?? null;
+			$media['description']    = $data['text']                  ?? null;
+			$media['name']           = $data['title']                 ?? null;
 		}
 
 		$media['type']            = self::HTML;
-		$media['size']            = $data['size']                     ?? null;
-		$media['author-url']      = $data['author_url']         ?? null;
-		$media['author-name']     = $data['author_name']       ?? null;
-		$media['author-image']    = $data['author_img']       ?? null;
-		$media['publisher-url']   = $data['publisher_url']   ?? null;
+		$media['size']            = $data['size']           ?? null;
+		$media['author-url']      = $data['author_url']     ?? null;
+		$media['author-name']     = $data['author_name']    ?? null;
+		$media['author-image']    = $data['author_img']     ?? null;
+		$media['publisher-url']   = $data['publisher_url']  ?? null;
 		$media['publisher-name']  = $data['publisher_name'] ?? null;
-		$media['publisher-image'] = $data['publisher_img'] ?? null;
+		$media['publisher-image'] = $data['publisher_img']  ?? null;
 
 		return $media;
 	}
@@ -609,23 +613,35 @@ class Media
 		if (preg_match_all("#\[url=([^\]]+?)\]\s*\[img=([^\[\]]*)\]([^\[\]]*)\[\/img\]\s*\[/url\]$endmatchpattern#ism", $body, $pictures, PREG_SET_ORDER)) {
 			foreach ($pictures as $picture) {
 				if (self::isLinkToImagePage($picture[1], $picture[2])) {
-					$body                = str_replace($picture[0], '', $body);
-					$image               = str_replace(['-1.', '-2.'], '-0.', $picture[2]);
+					$body  = str_replace($picture[0], '', $body);
+					$image = str_replace(['-1.', '-2.'], '-0.', $picture[2]);
+
 					$attachments[$image] = [
-						'uri-id'  => $uriid, 'type' => self::IMAGE, 'url' => $image,
-						'preview' => $picture[2], 'description' => $picture[3]
+						'uri-id'      => $uriid,
+						'type'        => self::IMAGE,
+						'url'         => $image,
+						'preview'     => $picture[2],
+						'description' => $picture[3]
 					];
 				} elseif (self::isLinkToPhoto($picture[1], $picture[2])) {
-					$body                     = str_replace($picture[0], '', $body);
+					$body = str_replace($picture[0], '', $body);
+
 					$attachments[$picture[1]] = [
-						'uri-id'  => $uriid, 'type' => self::IMAGE, 'url' => $picture[1],
-						'preview' => $picture[2], 'description' => $picture[3]
+						'uri-id'      => $uriid,
+						'type'        => self::IMAGE,
+						'url'         => $picture[1],
+						'preview'     => $picture[2],
+						'description' => $picture[3]
 					];
 				} elseif ($removepicturelinks) {
-					$body                     = str_replace($picture[0], '', $body);
+					$body = str_replace($picture[0], '', $body);
+
 					$attachments[$picture[1]] = [
-						'uri-id'  => $uriid, 'type' => self::UNKNOWN, 'url' => $picture[1],
-						'preview' => $picture[2], 'description' => $picture[3]
+						'uri-id'      => $uriid,
+						'type'        => self::UNKNOWN,
+						'url'         => $picture[1],
+						'preview'     => $picture[2],
+						'description' => $picture[3]
 					];
 				}
 			}
@@ -633,7 +649,8 @@ class Media
 
 		if (preg_match_all("/\[img=([^\[\]]*)\]([^\[\]]*)\[\/img\]$endmatchpattern/Usi", $body, $pictures, PREG_SET_ORDER)) {
 			foreach ($pictures as $picture) {
-				$body                     = str_replace($picture[0], '', $body);
+				$body = str_replace($picture[0], '', $body);
+
 				$attachments[$picture[1]] = ['uri-id' => $uriid, 'type' => self::IMAGE, 'url' => $picture[1], 'description' => $picture[2]];
 			}
 		}
@@ -641,23 +658,35 @@ class Media
 		if (preg_match_all("#\[url=([^\]]+?)\]\s*\[img\]([^\[]+?)\[/img\]\s*\[/url\]$endmatchpattern#ism", $body, $pictures, PREG_SET_ORDER)) {
 			foreach ($pictures as $picture) {
 				if (self::isLinkToImagePage($picture[1], $picture[2])) {
-					$body                = str_replace($picture[0], '', $body);
-					$image               = str_replace(['-1.', '-2.'], '-0.', $picture[2]);
+					$body  = str_replace($picture[0], '', $body);
+					$image = str_replace(['-1.', '-2.'], '-0.', $picture[2]);
+
 					$attachments[$image] = [
-						'uri-id'  => $uriid, 'type' => self::IMAGE, 'url' => $image,
-						'preview' => $picture[2], 'description' => null
+						'uri-id'      => $uriid,
+						'type'        => self::IMAGE,
+						'url'         => $image,
+						'preview'     => $picture[2],
+						'description' => null
 					];
 				} elseif (self::isLinkToPhoto($picture[1], $picture[2])) {
-					$body                     = str_replace($picture[0], '', $body);
+					$body = str_replace($picture[0], '', $body);
+
 					$attachments[$picture[1]] = [
-						'uri-id'  => $uriid, 'type' => self::IMAGE, 'url' => $picture[1],
-						'preview' => $picture[2], 'description' => null
+						'uri-id'      => $uriid,
+						'type'        => self::IMAGE,
+						'url'         => $picture[1],
+						'preview'     => $picture[2],
+						'description' => null
 					];
 				} elseif ($removepicturelinks) {
-					$body                     = str_replace($picture[0], '', $body);
+					$body = str_replace($picture[0], '', $body);
+
 					$attachments[$picture[1]] = [
-						'uri-id'  => $uriid, 'type' => self::UNKNOWN, 'url' => $picture[1],
-						'preview' => $picture[2], 'description' => null
+						'uri-id'      => $uriid,
+						'type'        => self::UNKNOWN,
+						'url'         => $picture[1],
+						'preview'     => $picture[2],
+						'description' => null
 					];
 				}
 			}
@@ -665,21 +694,24 @@ class Media
 
 		if (preg_match_all("/\[img\]([^\[\]]*)\[\/img\]$endmatchpattern/ism", $body, $pictures, PREG_SET_ORDER)) {
 			foreach ($pictures as $picture) {
-				$body                     = str_replace($picture[0], '', $body);
+				$body = str_replace($picture[0], '', $body);
+
 				$attachments[$picture[1]] = ['uri-id' => $uriid, 'type' => self::IMAGE, 'url' => $picture[1]];
 			}
 		}
 
 		if (preg_match_all("/\[audio\]([^\[\]]*)\[\/audio\]$endmatchpattern/ism", $body, $audios, PREG_SET_ORDER)) {
 			foreach ($audios as $audio) {
-				$body                   = str_replace($audio[0], '', $body);
+				$body = str_replace($audio[0], '', $body);
+
 				$attachments[$audio[1]] = ['uri-id' => $uriid, 'type' => self::AUDIO, 'url' => $audio[1]];
 			}
 		}
 
 		if (preg_match_all("/\[video\]([^\[\]]*)\[\/video\]$endmatchpattern/ism", $body, $videos, PREG_SET_ORDER)) {
 			foreach ($videos as $video) {
-				$body                   = str_replace($video[0], '', $body);
+				$body = str_replace($video[0], '', $body);
+
 				$attachments[$video[1]] = ['uri-id' => $uriid, 'type' => self::VIDEO, 'url' => $video[1]];
 			}
 		}
@@ -811,12 +843,12 @@ class Media
 			'uri-id'         => $uriid,
 			'type'           => self::HTML,
 			'url'            => $data['url'],
-			'preview'        => $data['preview']              ?? null,
-			'description'    => $data['description']      ?? null,
-			'name'           => $data['title']                   ?? null,
-			'author-url'     => $data['author_url']        ?? null,
-			'author-name'    => $data['author_name']      ?? null,
-			'publisher-url'  => $data['provider_url']   ?? null,
+			'preview'        => $data['preview']       ?? null,
+			'description'    => $data['description']   ?? null,
+			'name'           => $data['title']         ?? null,
+			'author-url'     => $data['author_url']    ?? null,
+			'author-name'    => $data['author_name']   ?? null,
+			'publisher-url'  => $data['provider_url']  ?? null,
 			'publisher-name' => $data['provider_name'] ?? null,
 		];
 		if (!empty($data['image'])) {

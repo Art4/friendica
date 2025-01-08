@@ -9,18 +9,18 @@ declare(strict_types=1);
 
 namespace Friendica\Test\Unit;
 
-use Dice\Dice;
 use Friendica\App;
+use Friendica\Core\Container;
 use PHPUnit\Framework\TestCase;
 
 class AppTest extends TestCase
 {
-	public function testFromDiceReturnsApp(): void
+	public function testFromContainerReturnsApp(): void
 	{
-		$dice = $this->createMock(Dice::class);
-		$dice->expects($this->never())->method('create');
+		$container = $this->createMock(Container::class);
+		$container->expects($this->never())->method('create');
 
-		$app = App::fromDice($dice);
+		$app = App::fromContainer($container);
 
 		$this->assertInstanceOf(App::class, $app);
 	}

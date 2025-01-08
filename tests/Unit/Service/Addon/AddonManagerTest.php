@@ -29,11 +29,11 @@ class AddonManagerTest extends TestCase
 
 	public function testGetAllSubscribedEventsReturnsEvents(): void
 	{
-		$addon = $this->createMock(Addon::class);
-		$addon->expects($this->once())->method('getSubscribedEvents')->willReturn([[HtmlFilterEvent::PAGE_END, [Addon::class, 'onPageEnd']]]);
+		$addon = $this->createStub(Addon::class);
+		$addon->method('getSubscribedEvents')->willReturn([[HtmlFilterEvent::PAGE_END, [Addon::class, 'onPageEnd']]]);
 
-		$loader = $this->createMock(AddonLoader::class);
-		$loader->expects($this->once())->method('getAddons')->willReturn(['helloaddon' => $addon]);
+		$loader = $this->createStub(AddonLoader::class);
+		$loader->method('getAddons')->willReturn(['helloaddon' => $addon]);
 
 		$manager = new AddonManager($loader);
 
@@ -42,6 +42,25 @@ class AddonManagerTest extends TestCase
 		$this->assertSame(
 			[[HtmlFilterEvent::PAGE_END, [Addon::class, 'onPageEnd']]],
 			$manager->getAllSubscribedEvents()
+		);
+	}
+
+	public function testGetRequiredDependenciesReturnsArray(): void
+	{
+		$addon = $this->createStub(Addon::class);
+		$addon->method('getId')->willReturn('helloaddon');
+		$addon->method('getRequiredDependencies')->willReturn(['foo', 'bar']);
+
+		$loader = $this->createStub(AddonLoader::class);
+		$loader->method('getAddons')->willReturn(['helloaddon' => $addon]);
+
+		$manager = new AddonManager($loader);
+
+		$manager->bootstrapAddons(['helloaddon' => []]);
+
+		$this->assertSame(
+			['helloaddon' => ['foo', 'bar']],
+			$manager->getRequiredDependencies()
 		);
 	}
 }

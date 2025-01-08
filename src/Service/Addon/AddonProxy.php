@@ -19,13 +19,21 @@ use Friendica\Addon\InstallableAddon;
  */
 final class AddonProxy implements Addon
 {
+	private string $id;
+
 	private AddonBootstrap $bootstrap;
 
 	private bool $isInit = false;
 
-	public function __construct(AddonBootstrap $bootstrap)
+	public function __construct(string $id, AddonBootstrap $bootstrap)
 	{
+		$this->id        = $id;
 		$this->bootstrap = $bootstrap;
+	}
+
+	public function getId(): string
+	{
+		return $this->id;
 	}
 
 	public function getRequiredDependencies(): array

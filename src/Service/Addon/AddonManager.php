@@ -41,6 +41,18 @@ final class AddonManager
 		return array_unique($dependencies);
 	}
 
+	public function getRequiredDependencies(): array
+	{
+		$dependencies = [];
+
+		foreach ($this->addons as $addon) {
+			// @TODO Here we can filter or deny dependencies from addons
+			$dependencies[$addon->getId()] =  $addon->getRequiredDependencies();
+		}
+
+		return $dependencies;
+	}
+
 	public function getProvidedDependencyRules(): array
 	{
 		$dependencyRules = [];

@@ -16,13 +16,22 @@ use PHPUnit\Framework\TestCase;
 
 class LegacyAddonProxyTest extends TestCase
 {
-	public function testCreateWithNameAndPath(): void
+	public function testCreateWithIdAndPath(): void
 	{
 		$root = vfsStream::setup('addons', 0777, ['helloaddon' => []]);
 
 		$addon = new LegacyAddonProxy('helloaddon', $root->url());
 
 		$this->assertInstanceOf(Addon::class, $addon);
+	}
+
+	public function testGetIdReturnsId(): void
+	{
+		$root = vfsStream::setup('addons', 0777, ['helloaddon' => []]);
+
+		$addon = new LegacyAddonProxy('helloaddon', $root->url());
+
+		$this->assertSame('helloaddon', $addon->getId());
 	}
 
 	public function testGetRequiredDependenciesReturnsEmptyArray(): void

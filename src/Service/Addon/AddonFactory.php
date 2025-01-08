@@ -65,7 +65,7 @@ final class AddonFactory implements AddonLoader
 			throw new \RuntimeException(sprintf('Bootstrap file for addon "%s" MUST return an instance of AddonBootstrap.', $addonName));
 		}
 
-		$addon = new AddonProxy($bootstrap);
+		$addon = new AddonProxy($addonName, $bootstrap);
 
 		$this->logger->info(sprintf('Addon "%s" loaded.', $addonName));
 

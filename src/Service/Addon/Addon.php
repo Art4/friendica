@@ -14,6 +14,8 @@ namespace Friendica\Service\Addon;
  */
 interface Addon
 {
+	public function getId(): string;
+
 	public function getRequiredDependencies(): array;
 
 	public function getSubscribedEvents(): array;

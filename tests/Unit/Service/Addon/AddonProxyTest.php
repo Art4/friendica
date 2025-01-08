@@ -38,9 +38,18 @@ class AddonProxyTest extends TestCase
 	{
 		$bootstrap = $this->createStub(AddonBootstrap::class);
 
-		$addon = new AddonProxy($bootstrap);
+		$addon = new AddonProxy('id', $bootstrap);
 
 		$this->assertInstanceOf(Addon::class, $addon);
+	}
+
+	public function testGetIdReturnsId(): void
+	{
+		$bootstrap = $this->createStub(AddonBootstrap::class);
+
+		$addon = new AddonProxy('id', $bootstrap);
+
+		$this->assertSame('id', $addon->getId());
 	}
 
 	public function testGetRequiredDependenciesCallsBootstrap(): void
@@ -48,7 +57,7 @@ class AddonProxyTest extends TestCase
 		$bootstrap = $this->createMock(AddonBootstrap::class);
 		$bootstrap->expects($this->once())->method('getRequiredDependencies')->willReturn([]);
 
-		$addon = new AddonProxy($bootstrap);
+		$addon = new AddonProxy('id', $bootstrap);
 
 		$addon->getRequiredDependencies();
 	}
@@ -58,7 +67,7 @@ class AddonProxyTest extends TestCase
 		$bootstrap = $this->createMock(CombinedAddonBootstrapDependencyProvider::class);
 		$bootstrap->expects($this->once())->method('provideDependencyRules')->willReturn([]);
 
-		$addon = new AddonProxy($bootstrap);
+		$addon = new AddonProxy('id', $bootstrap);
 
 		$addon->getProvidedDependencyRules();
 	}
@@ -68,7 +77,7 @@ class AddonProxyTest extends TestCase
 		$bootstrap = $this->createMock(AddonBootstrap::class);
 		$bootstrap->expects($this->once())->method('getSubscribedEvents')->willReturn(['foo' => 'bar']);
 
-		$addon = new AddonProxy($bootstrap);
+		$addon = new AddonProxy('id', $bootstrap);
 
 		$this->assertSame(
 			[
@@ -86,7 +95,7 @@ class AddonProxyTest extends TestCase
 			$this->assertInstanceOf(AddonStartEvent::class, $event);
 		});
 
-		$addon = new AddonProxy($bootstrap);
+		$addon = new AddonProxy('id', $bootstrap);
 
 		$addon->initAddon([]);
 	}
@@ -98,7 +107,7 @@ class AddonProxyTest extends TestCase
 			$this->assertInstanceOf(AddonStartEvent::class, $event);
 		});
 
-		$addon = new AddonProxy($bootstrap);
+		$addon = new AddonProxy('id', $bootstrap);
 
 		$addon->initAddon([]);
 		$addon->initAddon([]);
@@ -115,7 +124,7 @@ class AddonProxyTest extends TestCase
 			$this->assertInstanceOf(LoggerInterface::class, $dependencies[LoggerInterface::class]);
 		});
 
-		$addon = new AddonProxy($bootstrap);
+		$addon = new AddonProxy('id', $bootstrap);
 
 		$addon->initAddon(
 			[LoggerInterface::class => $this->createStub(LoggerInterface::class)]
@@ -127,7 +136,7 @@ class AddonProxyTest extends TestCase
 		$bootstrap = $this->createMock(CombinedAddonBootstrapInstallableAddon::class);
 		$bootstrap->expects($this->once())->method('install');
 
-		$addon = new AddonProxy($bootstrap);
+		$addon = new AddonProxy('id', $bootstrap);
 
 		$addon->initAddon([]);
 		$addon->installAddon();
@@ -138,7 +147,7 @@ class AddonProxyTest extends TestCase
 		$bootstrap = $this->createMock(CombinedAddonBootstrapInstallableAddon::class);
 		$bootstrap->expects($this->once())->method('uninstall');
 
-		$addon = new AddonProxy($bootstrap);
+		$addon = new AddonProxy('id', $bootstrap);
 
 		$addon->initAddon([]);
 		$addon->uninstallAddon();

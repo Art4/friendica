@@ -17,13 +17,17 @@ use Friendica\App\Router;
 use Friendica\Capabilities\ICanCreateResponses;
 use Friendica\Capabilities\ICanHandleRequests;
 use Friendica\Content\Nav;
+use Friendica\Core\Addon\Capability\ICanLoadAddons;
 use Friendica\Core\Config\Factory\Config;
 use Friendica\Core\Container;
+use Friendica\Core\Logger\LoggerManager;
 use Friendica\Core\Renderer;
 use Friendica\Core\Session\Capability\IHandleUserSessions;
 use Friendica\Core\Config\Capability\IManageConfigValues;
+use Friendica\Core\DiceContainer;
 use Friendica\Core\L10n;
 use Friendica\Core\Logger\Capability\LogChannel;
+use Friendica\Core\Logger\Handler\ErrorHandler;
 use Friendica\Core\PConfig\Capability\IManagePersonalConfigValues;
 use Friendica\Core\System;
 use Friendica\Core\Update;
@@ -141,9 +145,13 @@ class App
 			],
 		]);
 
-		$this->container->setup(LogChannel::APP, false);
-
 		$this->setupAddons();
+
+		$this->setupLogChannel(LogChannel::APP);
+
+		$this->setupLegacyServiceLocator();
+
+		$this->registerErrorHandler();
 
 		$this->registerEventDispatcher();
 
@@ -180,9 +188,34 @@ class App
 		);
 	}
 
+	public function processConsole(array $argv): void
+	{
+		$this->setupAddons();
+
+		$this->setupLogChannel($this->determineLogChannel($argv));
+
+		$this->setupLegacyServiceLocator();
+
+		$this->registerErrorHandler();
+
+		$this->registerEventDispatcher();
+
+		$this->registerTemplateEngine();
+
+		(\Friendica\Core\Console::create($this->container, $argv))->execute();
+	}
+
 	public function processEjabberd(): void
 	{
-		$this->container->setup(LogChannel::AUTH_JABBERED, false);
+		$this->setupAddons();
+
+		$this->setupLogChannel(LogChannel::AUTH_JABBERED);
+
+		$this->setupLegacyServiceLocator();
+
+		$this->registerErrorHandler();
+
+		$this->registerEventDispatcher();
 
 		/** @var BasePath */
 		$basePath = $this->container->create(BasePath::class);
@@ -201,6 +234,13 @@ class App
 
 	private function setupAddons(): void
 	{
+		/** @var ICanLoadAddons $addonLoader */
+		$addonLoader = $this->container->create(ICanLoadAddons::class);
+
+		foreach ($addonLoader->getActiveAddonConfig('dependencies') as $name => $rule) {
+			$this->container->addRule($name, $rule);
+		}
+
 		$config = $this->container->create(IManageConfigValues::class);
 
 		$this->addonManager = $this->container->create(AddonManager::class);
@@ -221,6 +261,42 @@ class App
 		}
 
 		$this->addonManager->initAddons($containers);
+	}
+
+	private function determineLogChannel(array $argv): string
+	{
+		$command = strtolower($argv[1] ?? '');
+
+		if ($command === 'daemon' || $command === 'jetstream') {
+			return LogChannel::DAEMON;
+		}
+
+		if ($command === 'worker') {
+			return LogChannel::WORKER;
+		}
+
+		// @TODO Add support for jetstream
+
+		return LogChannel::CONSOLE;
+	}
+
+	private function setupLogChannel(string $logChannel): void
+	{
+		/** @var LoggerManager */
+		$loggerManager = $this->container->create(LoggerManager::class);
+		$loggerManager->changeLogChannel($logChannel);
+	}
+
+	private function setupLegacyServiceLocator(): void
+	{
+		if ($this->container instanceof DiceContainer) {
+			DI::init($this->container->getDice());
+		}
+	}
+
+	private function registerErrorHandler(): void
+	{
+		ErrorHandler::register($this->container->create(LoggerInterface::class));
 	}
 
 	private function registerEventDispatcher(): void

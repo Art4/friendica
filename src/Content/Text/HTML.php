@@ -163,7 +163,7 @@ class HTML
 			$doc                     = new DOMDocument();
 			$doc->preserveWhiteSpace = false;
 
-			$message = mb_convert_encoding($message, 'HTML-ENTITIES', "UTF-8");
+			$message = mb_encode_numericentity($message, [0x80, 0x10FFFF, 0, ~0], 'UTF-8');
 
 			if (empty($message)) {
 				return '';
@@ -575,7 +575,7 @@ class HTML
 		$doc                     = new DOMDocument();
 		$doc->preserveWhiteSpace = false;
 
-		$message = mb_convert_encoding($message, 'HTML-ENTITIES', "UTF-8");
+		$message = mb_encode_numericentity($message, [0x80, 0x10FFFF, 0, ~0], 'UTF-8');
 
 		if (empty($message)) {
 			DI::profiler()->stopRecording();

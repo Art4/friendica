@@ -1669,7 +1669,7 @@ class Probe
 						'given_name'   => $split_name['first'],
 						'family_name'  => $split_name['last'],
 						'nick'         => $owner['nick'],
-						'guid'         => $approfile['diaspora:guid'],
+						'guid'         => $approfile['diaspora:guid'] ?? '',
 						'url'          => $owner['url'],
 						'addr'         => $owner['addr'],
 						'alias'        => $owner['alias'],

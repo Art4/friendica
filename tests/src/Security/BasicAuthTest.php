@@ -12,6 +12,15 @@ use Friendica\Test\ApiTestCase;
 
 class BasicAuthTest extends ApiTestCase
 {
+	protected function setUp(): void
+	{
+		parent::setUp();
+
+		unset($_REQUEST['source']);
+		unset($_SERVER['HTTP_USER_AGENT']);
+		BasicAuth::setCurrentUserID();
+	}
+
 	/**
 	 * Test the api_source() function.
 	 *

@@ -64,8 +64,19 @@ trait FixtureTestTrait
 
 		DBStructure::checkInitialValues();
 
-		// Load the API dataset for the whole API
-		$this->loadFixture(__DIR__ . '/Fixtures/api.fixture.php', $dba);
+		// Clear leftover app data from the database before loading fixtures
+		$fixtureData = include __DIR__ . '/Fixtures/api.fixture.php';
+		$dba->e('SET FOREIGN_KEY_CHECKS = 0');
+		foreach ($fixtureData as $tableName => $rows) {
+			if (!is_numeric($tableName) && is_array($rows)) {
+				$dba->e("DELETE FROM `{$tableName}`");
+			}
+		}
+		$this->loadDirectFixture($fixtureData, $dba);
+		$dba->e('SET FOREIGN_KEY_CHECKS = 1');
+
+		// Restore auxiliary rows (e.g. user uid=0, contact id=0, verb entries) removed during cleanup
+		DBStructure::checkInitialValues();
 	}
 
 	protected function tearDownFixtures(): void

@@ -22,6 +22,8 @@ class UploadTest extends ApiTestCase
 	{
 		parent::setUp();
 
+		$_FILES = [];
+
 		$this->useHttpMethod(Router::POST);
 	}
 

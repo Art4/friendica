@@ -296,7 +296,7 @@ class Installer
 		$res    = false;
 		$status = true;
 
-		if (function_exists('openssl_pkey_new')) {
+		if ($this->functionExists('openssl_pkey_new')) {
 			$res = openssl_pkey_new([
 				'digest_alg'       => 'sha1',
 				'private_key_bits' => 4096,
@@ -316,6 +316,24 @@ class Installer
 	}
 
 	/**
+	 * @param string $class The class name
+	 * @return bool true if the class exists
+	 */
+	protected function classExists(string $class): bool
+	{
+		return class_exists($class);
+	}
+
+	/**
+	 * @param string $name The function name
+	 * @return bool true if the function exists
+	 */
+	protected function functionExists(string $name): bool
+	{
+		return function_exists($name);
+	}
+
+	/**
 	 * PHP basic function check
 	 *
 	 * @param string $name The name of the function
@@ -329,7 +347,7 @@ class Installer
 	{
 		$currHelp = '';
 		$status   = true;
-		if (!function_exists($name)) {
+		if (!$this->functionExists($name)) {
 			$currHelp = $help;
 			$status   = false;
 		}
@@ -360,7 +378,7 @@ class Installer
 
 		$help   = '';
 		$status = true;
-		if (function_exists('apache_get_modules') && !in_array('mod_rewrite', apache_get_modules())) {
+		if ($this->functionExists('apache_get_modules') && !in_array('mod_rewrite', apache_get_modules())) {
 			$help      = DI::l10n()->t('Error: Apache webserver mod-rewrite module is required but not installed.');
 			$status    = false;
 			$returnVal = false;
@@ -369,11 +387,11 @@ class Installer
 
 		$help   = '';
 		$status = true;
-		if (!function_exists('mysqli_connect') && !class_exists('pdo')) {
+		if (!$this->functionExists('mysqli_connect') && !$this->classExists('pdo')) {
 			$status    = false;
 			$help      = DI::l10n()->t('Error: PDO or MySQLi PHP module required but not installed.');
 			$returnVal = false;
-		} elseif (!function_exists('mysqli_connect') && class_exists('pdo') && !in_array('mysql', \PDO::getAvailableDrivers())) {
+		} elseif (!$this->functionExists('mysqli_connect') && $this->classExists('pdo') && !in_array('mysql', \PDO::getAvailableDrivers())) {
 			$status    = false;
 			$help      = DI::l10n()->t('Error: The MySQL driver for PDO is not installed.');
 			$returnVal = false;
@@ -382,7 +400,7 @@ class Installer
 
 		$help   = '';
 		$status = true;
-		if (!class_exists('IntlChar')) {
+		if (!$this->classExists('IntlChar')) {
 			$status    = false;
 			$help      = DI::l10n()->t('Error: The IntlChar module is not installed.');
 			$returnVal = false;
@@ -557,7 +575,7 @@ class Installer
 		$status    = true;
 		$help      = "";
 		$error_msg = "";
-		if (function_exists('curl_init')) {
+		if ($this->functionExists('curl_init')) {
 			$fetchResult = DI::httpClient()->get($baseurl . "/install/testrewrite");
 
 			$url = Strings::normaliseLink($baseurl . "/install/testrewrite");
@@ -626,7 +644,7 @@ class Installer
 	 */
 	public function checkImagick()
 	{
-		if (!class_exists('Imagick')) {
+		if (!$this->classExists('Imagick')) {
 			$this->addCheck(DI::l10n()->t('ImageMagick PHP extension is not installed'), false, false, "");
 		} else {
 			$this->addCheck(DI::l10n()->t('ImageMagick PHP extension is installed'), true, false, "");

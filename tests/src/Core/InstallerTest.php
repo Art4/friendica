@@ -18,12 +18,10 @@ use Friendica\Test\MockedTestCase;
 use Friendica\Test\Util\VFSTrait;
 use Mockery;
 use Mockery\MockInterface;
-use phpmock\phpunit\PHPMock;
 
 class InstallerTest extends MockedTestCase
 {
 	use VFSTrait;
-	use PHPMock;
 
 	/**
 	 * @var L10n|MockInterface
@@ -50,15 +48,6 @@ class InstallerTest extends MockedTestCase
 				   ->andReturn($this->l10nMock);
 
 		DI::init($this->dice, true);
-	}
-
-	public static function tearDownAfterClass(): void
-	{
-		// Reset mocking
-		global $phpMock;
-		$phpMock = [];
-
-		parent::tearDownAfterClass();
 	}
 
 	private function mockL10nT(string $text, $times = null)
@@ -127,33 +116,31 @@ class InstallerTest extends MockedTestCase
 	#[\PHPUnit\Framework\Attributes\DataProvider('getCheckKeysData')]
 	public function testCheckKeys($function, $expected): void
 	{
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) use ($function, $expected) {
+		$this->l10nMock->shouldReceive('t')->andReturnUsing(function ($args) { return $args; });
+
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) use ($function, $expected) {
 			if ($function_name === $function) {
 				return $expected;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
 
-		$this->l10nMock->shouldReceive('t')->andReturnUsing(function ($args) { return $args; });
-
-		$install = new Installer();
 		self::assertSame($expected, $install->checkKeys());
 	}
 
 	public function testCheckFunctionsWithoutIntlChar(): void
 	{
-		$class_exists = $this->getFunctionMock('Friendica\Core', 'class_exists');
-		$class_exists->expects($this->any())->willReturnCallback(function ($class_name) {
+		$this->mockFunctionL10TCalls();
+
+		$install = $this->createPartialMock(Installer::class, ['classExists']);
+		$install->method('classExists')->willReturnCallback(function ($class_name) {
 			if ($class_name === 'IntlChar') {
 				return false;
 			}
-			return call_user_func_array(\class_exists(...), func_get_args());
+			return class_exists($class_name);
 		});
 
-		$this->mockFunctionL10TCalls();
-
-		$install = new Installer();
 		self::assertFalse($install->checkFunctions());
 		self::assertCheckExist(
 			2,
@@ -167,17 +154,16 @@ class InstallerTest extends MockedTestCase
 
 	public function testCheckFunctionsWithoutCurlInit(): void
 	{
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) {
+		$this->mockFunctionL10TCalls(true);
+
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) {
 			if ($function_name === 'curl_init') {
 				return false;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
 
-		$this->mockFunctionL10TCalls(true);
-
-		$install = new Installer();
 		self::assertFalse($install->checkFunctions());
 		self::assertCheckExist(
 			4,
@@ -191,17 +177,16 @@ class InstallerTest extends MockedTestCase
 
 	public function testCheckFunctionsWithoutImagecreateformjpeg(): void
 	{
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) {
+		$this->mockFunctionL10TCalls(true);
+
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) {
 			if ($function_name === 'imagecreatefromjpeg') {
 				return false;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
 
-		$this->mockFunctionL10TCalls(true);
-
-		$install = new Installer();
 		self::assertFalse($install->checkFunctions());
 		self::assertCheckExist(
 			5,
@@ -215,17 +200,16 @@ class InstallerTest extends MockedTestCase
 
 	public function testCheckFunctionsWithoutOpensslpublicencrypt(): void
 	{
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) {
+		$this->mockFunctionL10TCalls(true);
+
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) {
 			if ($function_name === 'openssl_public_encrypt') {
 				return false;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
 
-		$this->mockFunctionL10TCalls(true);
-
-		$install = new Installer();
 		self::assertFalse($install->checkFunctions());
 		self::assertCheckExist(
 			6,
@@ -239,17 +223,16 @@ class InstallerTest extends MockedTestCase
 
 	public function testCheckFunctionsWithoutMbStrlen(): void
 	{
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) {
+		$this->mockFunctionL10TCalls(true);
+
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) {
 			if ($function_name === 'mb_strlen') {
 				return false;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
 
-		$this->mockFunctionL10TCalls(true);
-
-		$install = new Installer();
 		self::assertFalse($install->checkFunctions());
 		self::assertCheckExist(
 			7,
@@ -263,17 +246,16 @@ class InstallerTest extends MockedTestCase
 
 	public function testCheckFunctionsWithoutIconvStrlen(): void
 	{
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) {
+		$this->mockFunctionL10TCalls(true);
+
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) {
 			if ($function_name === 'iconv_strlen') {
 				return false;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
 
-		$this->mockFunctionL10TCalls(true);
-
-		$install = new Installer();
 		self::assertFalse($install->checkFunctions());
 		self::assertCheckExist(
 			8,
@@ -287,17 +269,16 @@ class InstallerTest extends MockedTestCase
 
 	public function testCheckFunctionsWithoutPosixkill(): void
 	{
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) {
+		$this->mockFunctionL10TCalls(true);
+
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) {
 			if ($function_name === 'posix_kill') {
 				return false;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
 
-		$this->mockFunctionL10TCalls(true);
-
-		$install = new Installer();
 		self::assertFalse($install->checkFunctions());
 		self::assertCheckExist(
 			9,
@@ -311,17 +292,16 @@ class InstallerTest extends MockedTestCase
 
 	public function testCheckFunctionsWithoutProcOpen(): void
 	{
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) {
+		$this->mockFunctionL10TCalls(true);
+
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) {
 			if ($function_name === 'proc_open') {
 				return false;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
 
-		$this->mockFunctionL10TCalls(true);
-
-		$install = new Installer();
 		self::assertFalse($install->checkFunctions());
 		self::assertCheckExist(
 			10,
@@ -335,17 +315,16 @@ class InstallerTest extends MockedTestCase
 
 	public function testCheckFunctionsWithoutJsonEncode(): void
 	{
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) {
+		$this->mockFunctionL10TCalls(true);
+
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) {
 			if ($function_name === 'json_encode') {
 				return false;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
 
-		$this->mockFunctionL10TCalls(true);
-
-		$install = new Installer();
 		self::assertFalse($install->checkFunctions());
 		self::assertCheckExist(
 			11,
@@ -359,17 +338,16 @@ class InstallerTest extends MockedTestCase
 
 	public function testCheckFunctionsWithoutFinfoOpen(): void
 	{
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) {
+		$this->mockFunctionL10TCalls(true);
+
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) {
 			if ($function_name === 'finfo_open') {
 				return false;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
 
-		$this->mockFunctionL10TCalls(true);
-
-		$install = new Installer();
 		self::assertFalse($install->checkFunctions());
 		self::assertCheckExist(
 			12,
@@ -383,17 +361,16 @@ class InstallerTest extends MockedTestCase
 
 	public function testCheckFunctionsWithoutGmpStrval(): void
 	{
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) {
+		$this->mockFunctionL10TCalls(true);
+
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) {
 			if ($function_name === 'gmp_strval') {
 				return false;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
 
-		$this->mockFunctionL10TCalls(true);
-
-		$install = new Installer();
 		self::assertFalse($install->checkFunctions());
 		self::assertCheckExist(
 			13,
@@ -407,8 +384,10 @@ class InstallerTest extends MockedTestCase
 
 	public function testCheckFunctions(): void
 	{
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) {
+		$this->mockFunctionL10TCalls(true);
+
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) {
 			if (in_array(
 				$function_name,
 				[
@@ -425,12 +404,9 @@ class InstallerTest extends MockedTestCase
 			)) {
 				return true;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
 
-		$this->mockFunctionL10TCalls(true);
-
-		$install = new Installer();
 		self::assertTrue($install->checkFunctions());
 	}
 
@@ -453,16 +429,16 @@ class InstallerTest extends MockedTestCase
 
 	public function testCheckHtAccessFail(): void
 	{
+		$this->l10nMock->shouldReceive('t')->andReturnUsing(function ($args) { return $args; });
+
 		// Mocking that we can use CURL
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) {
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) {
 			if ($function_name === 'curl_init') {
 				return true;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
-
-		$this->l10nMock->shouldReceive('t')->andReturnUsing(function ($args) { return $args; });
 
 		// Mocking the CURL Response
 		$IHTTPResult = Mockery::mock(ICanHandleHttpResponses::class);
@@ -493,24 +469,22 @@ class InstallerTest extends MockedTestCase
 
 		DI::init($this->dice, true);
 
-		$install = new Installer();
-
 		self::assertFalse($install->checkHtAccess('https://test'));
 		self::assertSame('test Error', $install->getChecks()[0]['error_msg']['msg']);
 	}
 
 	public function testCheckHtAccessWork(): void
 	{
+		$this->l10nMock->shouldReceive('t')->andReturnUsing(function ($args) { return $args; });
+
 		// Mocking that we can use CURL
-		$function_exists = $this->getFunctionMock('Friendica\Core', 'function_exists');
-		$function_exists->expects($this->any())->willReturnCallback(function ($function_name) {
+		$install = $this->createPartialMock(Installer::class, ['functionExists']);
+		$install->method('functionExists')->willReturnCallback(function ($function_name) {
 			if ($function_name === 'curl_init') {
 				return true;
 			}
-			return call_user_func_array(\function_exists(...), func_get_args());
+			return function_exists($function_name);
 		});
-
-		$this->l10nMock->shouldReceive('t')->andReturnUsing(function ($args) { return $args; });
 
 		// Mocking the failed CURL Response
 		$IHTTPResultF = Mockery::mock(ICanHandleHttpResponses::class);
@@ -541,23 +515,20 @@ class InstallerTest extends MockedTestCase
 
 		DI::init($this->dice, true);
 
-		$install = new Installer();
-
 		self::assertTrue($install->checkHtAccess('https://test'));
 	}
 
 	public function testImagickNotInstalled(): void
 	{
-		$class_exists = $this->getFunctionMock('Friendica\Core', 'class_exists');
-		$class_exists->expects($this->any())->willReturnCallback(function ($class_name) {
+		$this->mockL10nT('ImageMagick PHP extension is not installed');
+
+		$install = $this->createPartialMock(Installer::class, ['classExists']);
+		$install->method('classExists')->willReturnCallback(function ($class_name) {
 			if ($class_name === 'Imagick') {
 				return false;
 			}
-			return call_user_func_array(\class_exists(...), func_get_args());
+			return class_exists($class_name);
 		});
-		$this->mockL10nT('ImageMagick PHP extension is not installed');
-
-		$install = new Installer();
 
 		// even there is no supported type, Imagick should return true (because it is not required)
 		self::assertTrue($install->checkImagick());

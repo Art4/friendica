@@ -12,10 +12,6 @@ use Friendica\Core\System;
 
 /**
  * Container for the whole request
- *
- * @see https://www.php-fig.org/psr/psr-7/#321-psrhttpmessageserverrequestinterface
- *
- * @todo future container class for whole requests, currently it's not :-)
  */
 class Request
 {
@@ -37,6 +33,12 @@ class Request
 	/** @var string The request-id of the current request */
 	protected $requestId;
 
+	public function __construct(IManageConfigValues $config, array $server = [])
+	{
+		$this->remoteAddress = self::determineRemoteAddress($config, $server);
+		$this->requestId     = self::determineRequestId($server);
+	}
+
 	/**
 	 * @return string The remote IP address of the current request
 	 *
@@ -57,12 +59,6 @@ class Request
 		return $this->requestId;
 	}
 
-	public function __construct(IManageConfigValues $config, array $server = [])
-	{
-		$this->remoteAddress = $this->determineRemoteAddress($config, $server);
-		$this->requestId     = $server[static::DEFAULT_REQUEST_ID_HEADER] ?? System::createGUID(8, false);
-	}
-
 	/**
 	 * Checks if given $remoteAddress matches given $trustedProxy.
 	 * If $trustedProxy is an IPv4 IP range given in CIDR notation, true will be returned if
@@ -76,7 +72,7 @@ class Request
 	 *
 	 * @return boolean true if $remoteAddress matches $trustedProxy, false otherwise
 	 */
-	protected function matchesTrustedProxy(string $trustedProxy, string $remoteAddress): bool
+	private static function matchesTrustedProxy(string $trustedProxy, string $remoteAddress): bool
 	{
 		$cidrre = '/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\/([0-9]{1,2})$/';
 
@@ -101,10 +97,10 @@ class Request
 	 *
 	 * @return boolean true if $remoteAddress matches any entry in $trustedProxies, false otherwise
 	 */
-	protected function isTrustedProxy(array $trustedProxies, string $remoteAddress): bool
+	private static function isTrustedProxy(array $trustedProxies, string $remoteAddress): bool
 	{
 		foreach ($trustedProxies as $tp) {
-			if ($this->matchesTrustedProxy($tp, $remoteAddress)) {
+			if (self::matchesTrustedProxy($tp, $remoteAddress)) {
 				return true;
 			}
 		}
@@ -117,17 +113,24 @@ class Request
 	 * and `forwarded_for_headers` has been configured then the IP address
 	 * specified in this header will be returned instead.
 	 *
+	 * @internal
+	 *
 	 * @param IManageConfigValues $config
 	 * @param array               $server The $_SERVER array
 	 *
 	 * @return string
 	 */
-	protected function determineRemoteAddress(IManageConfigValues $config, array $server): string
+	public static function determineRemoteAddress(?IManageConfigValues $config, array $server): string
 	{
-		$remoteAddress  = $server['REMOTE_ADDR'] ?? '0.0.0.0';
+		$remoteAddress = $server['REMOTE_ADDR'] ?? '0.0.0.0';
+
+		if ($config === null) {
+			return $remoteAddress;
+		}
+
 		$trustedProxies = preg_split('/(\s*,*\s*)*,+(\s*,*\s*)*/', (string) $config->get('proxy', 'trusted_proxies', ''));
 
-		if (\is_array($trustedProxies) && $this->isTrustedProxy($trustedProxies, $remoteAddress)) {
+		if (\is_array($trustedProxies) && self::isTrustedProxy($trustedProxies, $remoteAddress)) {
 			$forwardedForHeaders = preg_split('/(\s*,*\s*)*,+(\s*,*\s*)*/', (string) $config->get('proxy', 'forwarded_for_headers', static::DEFAULT_FORWARD_FOR_HEADER));
 
 			foreach ($forwardedForHeaders as $header) {
@@ -141,7 +144,7 @@ class Request
 						}
 
 						// skip trusted proxies in the list itself
-						if ($this->isTrustedProxy($trustedProxies, $IP)) {
+						if (self::isTrustedProxy($trustedProxies, $IP)) {
 							continue;
 						}
 
@@ -154,5 +157,13 @@ class Request
 		}
 
 		return $remoteAddress;
+	}
+
+	/**
+	 * @internal
+	 */
+	public static function determineRequestId(array $serverParams): string
+	{
+		return $serverParams[self::DEFAULT_REQUEST_ID_HEADER] ?? System::createGUID(8, false);
 	}
 }

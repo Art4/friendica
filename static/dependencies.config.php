@@ -190,6 +190,11 @@ return (function (string $basepath, array $getVars, array $serverVars, array $co
 		\Friendica\Core\Logger\Capability\IHaveCallIntrospections::class => [
 			'instanceOf'      => \Friendica\Core\Logger\Util\Introspection::class,
 			'constructParams' => [
+				[
+					\Dice\Dice::INSTANCE => function () use ($serverVars) {
+						return \Friendica\App\Request::determineRequestId($serverVars);
+					},
+				],
 				\Friendica\Core\Logger\Capability\IHaveCallIntrospections::IGNORE_CLASS_LIST,
 			],
 		],
@@ -244,8 +249,30 @@ return (function (string $basepath, array $getVars, array $serverVars, array $co
 		\Friendica\Core\Session\Capability\IHandleUserSessions::class => [
 			'instanceOf' => \Friendica\Core\Session\Model\UserSession::class,
 		],
+		\Friendica\Security\Authentication::class => [
+			'constructParams' => [
+				[
+					\Dice\Dice::INSTANCE => function (\Dice\Dice $dice) use ($serverVars) {
+						$config = $dice->create(\Friendica\Core\Config\Capability\IManageConfigValues::class);
+						return \Friendica\App\Request::determineRemoteAddress($config, $serverVars);
+					},
+					'params' => [
+						[\Dice\Dice::INSTANCE => \Dice\Dice::SELF],
+					],
+				],
+			],
+		],
 		\Friendica\Model\User\Cookie::class => [
 			'constructParams' => [
+				[
+					\Dice\Dice::INSTANCE => function (\Dice\Dice $dice) use ($serverVars) {
+						$config = $dice->create(\Friendica\Core\Config\Capability\IManageConfigValues::class);
+						return \Friendica\App\Request::determineRemoteAddress($config, $serverVars);
+					},
+					'params' => [
+						[\Dice\Dice::INSTANCE => \Dice\Dice::SELF],
+					],
+				],
 				$cookieVars,
 			],
 		],
@@ -277,16 +304,16 @@ return (function (string $basepath, array $getVars, array $serverVars, array $co
 				$serverVars,
 			],
 		],
-		\Friendica\App\Request::class => [
-			'constructParams' => [
-				$serverVars,
-			],
-		],
 		\Psr\Clock\ClockInterface::class => [
 			'instanceOf' => \Friendica\Util\Clock\SystemClock::class,
 		],
 		\Friendica\Module\Special\HTTPException::class => [
 			'constructParams' => [
+				[
+					\Dice\Dice::INSTANCE => function () use ($serverVars) {
+						return \Friendica\App\Request::determineRequestId($serverVars);
+					},
+				],
 				$serverVars,
 			],
 		],

@@ -10,6 +10,7 @@ namespace Friendica;
 use Friendica\App\Router;
 use Friendica\Capabilities\ICanHandleRequests;
 use Friendica\Capabilities\ICanCreateResponses;
+use Friendica\Capabilities\IRequestHandler;
 use Friendica\Core\L10n;
 use Friendica\Core\System;
 use Friendica\Event\ModuleContentEvent;
@@ -22,6 +23,7 @@ use Friendica\Network\HTTPException;
 use Friendica\Util\Profiler;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -33,10 +35,12 @@ use Psr\Log\LoggerInterface;
  *
  * @author Hypolite Petovan <hypolite@mrpetovan.com>
  */
-abstract class BaseModule implements ICanHandleRequests
+abstract class BaseModule implements ICanHandleRequests, IRequestHandler
 {
 	/** @var array */
 	protected $parameters = [];
+
+	private ?ServerRequestInterface $appRequest = null;
 	/** @var L10n */
 	protected $l10n;
 	/** @var App\BaseURL */
@@ -73,6 +77,17 @@ abstract class BaseModule implements ICanHandleRequests
 		$this->server          = $server;
 		$this->response        = $response;
 		$this->eventDispatcher = $eventDispatcher ?? DI::eventDispatcher();
+	}
+
+	/**
+	 * @throws \RuntimeException when called outside of an HTTP request (e.g. from a CLI module context)
+	 */
+	protected function getServerRequest(): ServerRequestInterface
+	{
+		if ($this->appRequest === null) {
+			throw new \RuntimeException('getServerRequest() cannot be called outside of an HTTP request context');
+		}
+		return $this->appRequest;
 	}
 
 	/**
@@ -182,10 +197,71 @@ abstract class BaseModule implements ICanHandleRequests
 	 */
 	protected function get(array $request = []) {}
 
+	public function handleRequest(ServerRequestInterface $request): ResponseInterface
+	{
+		$this->appRequest = $request;
+
+		$input = array_merge($request->getQueryParams(), (array) $request->getParsedBody());
+
+		// BC: If a child class overrides run(), route through the legacy path with deprecation warning
+		$refMethod = new \ReflectionMethod($this, 'run');
+		if ($refMethod->getDeclaringClass()->getName() !== self::class) {
+			@trigger_error(sprintf('%s::run() is deprecated since 2026.08, override handleRequest() instead.', static::class), E_USER_DEPRECATED);
+
+			$httpException = DI::getDice()->create(ModuleHTTPException::class);
+			return $this->run($httpException, $input);
+		}
+
+		try {
+			$this->dispatchRequestBase($input);
+			$this->dispatchRequestContent($input);
+			return $this->response->generate();
+		} catch (HTTPException $e) {
+			// In case of System::externalRedirects(), we don't want to prettyprint the exception
+			// just redirect to the new location
+			if (($e instanceof HTTPException\FoundException)
+				|| ($e instanceof HTTPException\MovedPermanentlyException)
+				|| ($e instanceof HTTPException\TemporaryRedirectException)) {
+				throw $e;
+			}
+
+			$httpException = DI::getDice()->create(ModuleHTTPException::class);
+
+			$this->response->setStatus($e->getCode(), $e->getMessage());
+			$this->response->addContent($httpException->content($e));
+
+			return $this->response->generate();
+		}
+	}
+
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @deprecated 2026.08 Use handleRequest() instead
 	 */
 	public function run(ModuleHTTPException $httpException, array $request = []): ResponseInterface
+	{
+		$this->dispatchRequestBase($request);
+		try {
+			$this->dispatchRequestContent($request);
+			return $this->response->generate();
+		} catch (HTTPException $e) {
+			// In case of System::externalRedirects(), we don't want to prettyprint the exception
+			// just redirect to the new location
+			if (($e instanceof HTTPException\FoundException)
+				|| ($e instanceof HTTPException\MovedPermanentlyException)
+				|| ($e instanceof HTTPException\TemporaryRedirectException)) {
+				throw $e;
+			}
+
+			$this->response->setStatus($e->getCode(), $e->getMessage());
+			$this->response->addContent($httpException->content($e));
+
+			return $this->response->generate();
+		}
+	}
+
+	private function dispatchRequestBase(array $request): void
 	{
 		// @see https://github.com/tootsuite/mastodon/blob/c3aef491d66aec743a3a53e934a494f653745b61/config/initializers/cors.rb
 		if (str_starts_with($this->args->getQueryString(), '.well-known/')) {
@@ -247,34 +323,23 @@ abstract class BaseModule implements ICanHandleRequests
 				break;
 		}
 
-		$timestamp = microtime(true);
 		// "rawContent" is especially meant for technical endpoints.
 		// This endpoint doesn't need any theme initialization or
 		// templating and is expected to exit on its own if it is set.
 		$this->rawContent($request);
+	}
 
-		try {
-			$content = $this->eventDispatcher->dispatch(
-				new ModuleContentEvent(ModuleContentEvent::MODULE_CONTENT, $this->args->getModuleName(), static::class, ''),
-			)->getContent();
-			$this->response->addContent($content);
-			$this->response->addContent($this->content($request));
-		} catch (HTTPException $e) {
-			// In case of System::externalRedirects(), we don't want to prettyprint the exception
-			// just redirect to the new location
-			if (($e instanceof HTTPException\FoundException)
-				|| ($e instanceof HTTPException\MovedPermanentlyException)
-				|| ($e instanceof HTTPException\TemporaryRedirectException)) {
-				throw $e;
-			}
+	private function dispatchRequestContent(array $request): void
+	{
+		$timestamp = microtime(true);
 
-			$this->response->setStatus($e->getCode(), $e->getMessage());
-			$this->response->addContent($httpException->content($e));
-		}
+		$content = $this->eventDispatcher->dispatch(
+			new ModuleContentEvent(ModuleContentEvent::MODULE_CONTENT, $this->args->getModuleName(), static::class, ''),
+		)->getContent();
+		$this->response->addContent($content);
+		$this->response->addContent($this->content($request));
 
 		$this->profiler->set(microtime(true) - $timestamp, 'content');
-
-		return $this->response->generate();
 	}
 
 	/**

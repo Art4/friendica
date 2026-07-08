@@ -8,7 +8,6 @@
 namespace Friendica\Test\src\Model\User;
 
 use Friendica\App\BaseURL;
-use Friendica\App\Request;
 use Friendica\Core\Config\Capability\IManageConfigValues;
 use Friendica\Model\User\Cookie;
 use Friendica\Test\MockedTestCase;
@@ -49,11 +48,10 @@ class CookieTest extends MockedTestCase
 		$this->baseUrl->shouldReceive('getScheme')->andReturn('https')->once();
 		$this->config->shouldReceive('get')->with('system', 'site_prvkey')->andReturn('1235')->once();
 		$this->config->shouldReceive('get')->with('system', 'auth_cookie_lifetime', Cookie::DEFAULT_EXPIRE)->andReturn('7')->once();
-		$this->config->shouldReceive('get')->with('proxy', 'trusted_proxies', '')->andReturn('')->once();
 
-		$request = new Request($this->config, static::SERVER_ARRAY);
+		$remoteAddress = '1.2.3.4';
 
-		$cookie = new Cookie($request, $this->config, $this->baseUrl);
+		$cookie = new Cookie($remoteAddress, $this->config, $this->baseUrl);
 		self::assertInstanceOf(Cookie::class, $cookie); // @phpstan-ignore staticMethod.alreadyNarrowedType
 	}
 
@@ -115,11 +113,10 @@ class CookieTest extends MockedTestCase
 		$this->baseUrl->shouldReceive('getScheme')->andReturn('https')->once();
 		$this->config->shouldReceive('get')->with('system', 'site_prvkey')->andReturn('1235')->once();
 		$this->config->shouldReceive('get')->with('system', 'auth_cookie_lifetime', Cookie::DEFAULT_EXPIRE)->andReturn('7')->once();
-		$this->config->shouldReceive('get')->with('proxy', 'trusted_proxies', '')->andReturn('')->once();
 
-		$request = new Request($this->config, static::SERVER_ARRAY);
+		$remoteAddress = '1.2.3.4';
 
-		$cookie = new Cookie($request, $this->config, $this->baseUrl, $cookieData);
+		$cookie = new Cookie($remoteAddress, $this->config, $this->baseUrl, $cookieData);
 		self::assertInstanceOf(Cookie::class, $cookie); // @phpstan-ignore staticMethod.alreadyNarrowedType
 
 		if (isset($uid)) {
@@ -175,11 +172,10 @@ class CookieTest extends MockedTestCase
 		$this->baseUrl->shouldReceive('getScheme')->andReturn('https')->once();
 		$this->config->shouldReceive('get')->with('system', 'site_prvkey')->andReturn($serverPrivateKey)->once();
 		$this->config->shouldReceive('get')->with('system', 'auth_cookie_lifetime', Cookie::DEFAULT_EXPIRE)->andReturn('7')->once();
-		$this->config->shouldReceive('get')->with('proxy', 'trusted_proxies', '')->andReturn('')->once();
 
-		$request = new Request($this->config, static::SERVER_ARRAY);
+		$remoteAddress = '1.2.3.4';
 
-		$cookie = new Cookie($request, $this->config, $this->baseUrl);
+		$cookie = new Cookie($remoteAddress, $this->config, $this->baseUrl);
 		self::assertInstanceOf(Cookie::class, $cookie); // @phpstan-ignore staticMethod.alreadyNarrowedType
 
 		self::assertEquals($assertTrue, $cookie->comparePrivateDataHash($assertHash, $password, $userPrivateKey));
@@ -235,13 +231,10 @@ class CookieTest extends MockedTestCase
 		$this->baseUrl->shouldReceive('getScheme')->andReturn('https')->once();
 		$this->config->shouldReceive('get')->with('system', 'site_prvkey')->andReturn($serverKey)->once();
 		$this->config->shouldReceive('get')->with('system', 'auth_cookie_lifetime', Cookie::DEFAULT_EXPIRE)->andReturn(Cookie::DEFAULT_EXPIRE)->once();
-		$this->config->shouldReceive('get')->with('proxy', 'trusted_proxies', '')->andReturn('')->once();
-		$this->config->shouldReceive('get')->with('proxy', 'forwarded_for_headers')->andReturn(Request::DEFAULT_FORWARD_FOR_HEADER);
 
+		$remoteAddress = $serverArray['REMOTE_ADDR'] ?? '0.0.0.0';
 
-		$request = new Request($this->config, $serverArray);
-
-		$cookie = new StaticCookie($request, $this->config, $this->baseUrl);
+		$cookie = new StaticCookie($remoteAddress, $this->config, $this->baseUrl);
 		self::assertInstanceOf(Cookie::class, $cookie); // @phpstan-ignore staticMethod.alreadyNarrowedType
 
 		$cookie->setMultiple([
@@ -261,12 +254,10 @@ class CookieTest extends MockedTestCase
 		$this->baseUrl->shouldReceive('getScheme')->andReturn('https')->once();
 		$this->config->shouldReceive('get')->with('system', 'site_prvkey')->andReturn($serverKey)->once();
 		$this->config->shouldReceive('get')->with('system', 'auth_cookie_lifetime', Cookie::DEFAULT_EXPIRE)->andReturn(Cookie::DEFAULT_EXPIRE)->once();
-		$this->config->shouldReceive('get')->with('proxy', 'trusted_proxies', '')->andReturn('')->once();
-		$this->config->shouldReceive('get')->with('proxy', 'forwarded_for_headers')->andReturn(Request::DEFAULT_FORWARD_FOR_HEADER);
 
-		$request = new Request($this->config, $serverArray);
+		$remoteAddress = $serverArray['REMOTE_ADDR'] ?? '0.0.0.0';
 
-		$cookie = new StaticCookie($request, $this->config, $this->baseUrl, $serverArray);
+		$cookie = new StaticCookie($remoteAddress, $this->config, $this->baseUrl, $serverArray);
 		self::assertInstanceOf(Cookie::class, $cookie); // @phpstan-ignore staticMethod.alreadyNarrowedType
 
 		$cookie->set('uid', $uid);
@@ -287,11 +278,10 @@ class CookieTest extends MockedTestCase
 		$this->baseUrl->shouldReceive('getScheme')->andReturn('https')->once();
 		$this->config->shouldReceive('get')->with('system', 'site_prvkey')->andReturn(24)->once();
 		$this->config->shouldReceive('get')->with('system', 'auth_cookie_lifetime', Cookie::DEFAULT_EXPIRE)->andReturn(Cookie::DEFAULT_EXPIRE)->once();
-		$this->config->shouldReceive('get')->with('proxy', 'trusted_proxies', '')->andReturn('')->once();
 
-		$request = new Request($this->config, static::SERVER_ARRAY);
+		$remoteAddress = '1.2.3.4';
 
-		$cookie = new StaticCookie($request, $this->config, $this->baseUrl);
+		$cookie = new StaticCookie($remoteAddress, $this->config, $this->baseUrl);
 		self::assertInstanceOf(Cookie::class, $cookie); // @phpstan-ignore staticMethod.alreadyNarrowedType
 
 		self::assertEquals('test', StaticCookie::$_COOKIE[Cookie::NAME]);

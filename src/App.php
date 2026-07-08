@@ -15,7 +15,7 @@ use Friendica\App\Page;
 use Friendica\App\Request;
 use Friendica\App\Router;
 use Friendica\Capabilities\ICanCreateResponses;
-use Friendica\Capabilities\ICanHandleRequests;
+use Friendica\Capabilities\IRequestHandler;
 use Friendica\Content\Nav;
 use Friendica\Core\Addon\AddonHelper;
 use Friendica\Core\Config\Factory\Config;
@@ -135,6 +135,18 @@ class App
 	 */
 	public function processRequest(ServerRequestInterface $request, float $start_time): void
 	{
+		$request = $this->mergeRequestInput($request);
+
+		$this->container->addRule(Request::class, [
+			'shared'          => true,
+			'constructParams' => [
+				[\Dice\Dice::INSTANCE => function (\Dice\Dice $dice) {
+					return $dice->create(IManageConfigValues::class);
+				}, 'params' => [[\Dice\Dice::INSTANCE => \Dice\Dice::SELF]]],
+				$request->getServerParams(),
+			],
+		]);
+
 		$this->container->addRule(Mode::class, [
 			'call' => [
 				['determineRunMode', [false, $request->getServerParams()], Dice::CHAIN_CALL],
@@ -151,7 +163,7 @@ class App
 
 		$this->registerEventDispatcher();
 
-		$this->requestId = $this->container->create(Request::class)->getRequestId();
+		$this->requestId = Request::determineRequestId($request->getServerParams());
 		$this->auth      = $this->container->create(Authentication::class);
 		$this->config    = $this->container->create(IManageConfigValues::class);
 		$this->mode      = $this->container->create(Mode::class);
@@ -427,7 +439,6 @@ class App
 	) {
 		$this->mode->setExecutor(Mode::INDEX);
 
-		$httpInput  = new HTTPInputData($request->getServerParams());
 		$serverVars = $request->getServerParams();
 		$queryVars  = $request->getQueryParams();
 
@@ -443,7 +454,6 @@ class App
 		$requeststring = ($serverVars['REQUEST_METHOD'] ?? '') . ' ' . ($serverVars['REQUEST_URI'] ?? '') . ' ' . ($serverVars['SERVER_PROTOCOL'] ?? '');
 		$this->logger->debug('Request received', ['address' => $serverVars['REMOTE_ADDR'] ?? '', 'request' => $requeststring, 'referer' => $serverVars['HTTP_REFERER'] ?? '', 'user-agent' => $serverVars['HTTP_USER_AGENT'] ?? '', 'requester' => $requester]);
 		$request_start = microtime(true);
-		$request       = $_REQUEST;
 
 		$this->profiler->set($start_time, 'start');
 		$this->profiler->set(microtime(true), 'classinit');
@@ -570,21 +580,9 @@ class App
 			// Display can change depending on the requested language, so it shouldn't be cached whole
 			header('Vary: Accept-Language', false);
 
-			// Processes data from GET requests
-			$httpinput = $httpInput->process();
-
-			if (!is_array($httpinput['variables'])) {
-				$httpinput['variables'] = [];
-			}
-			if (!is_array($httpinput['files'])) {
-				$httpinput['files'] = [];
-			}
-
-			$input = array_merge($httpinput['variables'], $httpinput['files'], $request);
-
 			// Let the module run its internal process (init, get, post, ...)
 			$timestamp = microtime(true);
-			$response  = $module->run($httpException, $input);
+			$response  = $module->handleRequest($request);
 			$this->profiler->set(microtime(true) - $timestamp, 'content');
 
 			// Wrapping HTML responses in the theme template
@@ -603,7 +601,7 @@ class App
 		$page->logRuntime($this->config, 'runFrontend');
 	}
 
-	private function createModuleInstance(?string $moduleClass = null): ICanHandleRequests
+	private function createModuleInstance(?string $moduleClass = null): IRequestHandler
 	{
 		/** @var Router $router */
 		$router = $this->container->create(Router::class);
@@ -615,7 +613,7 @@ class App
 
 		$stamp = microtime(true);
 
-		/** @var ICanHandleRequests $module */
+		/** @var IRequestHandler $module */
 		$module = $this->container->create($moduleClass, $parameters);
 
 		if ($dice_profiler_threshold > 0) {
@@ -626,6 +624,25 @@ class App
 		}
 
 		return $module;
+	}
+
+	/**
+	 * Merges HTTP body input data into the PSR-7 request's parsed body.
+	 *
+	 * The PSR-7 request already contains UploadedFileInterface objects from Guzzle's
+	 * fromGlobals(), so uploaded files are preserved as-is.
+	 */
+	private function mergeRequestInput(ServerRequestInterface $request): ServerRequestInterface
+	{
+		$httpData  = new HTTPInputData($request->getServerParams(), $request);
+		$inputData = $httpData->process();
+
+		return $request->withParsedBody(
+			array_merge(
+				(array) $request->getParsedBody(),
+				$inputData['variables'],
+			),
+		);
 	}
 
 	/**
